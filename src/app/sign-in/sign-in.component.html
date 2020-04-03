@@ -27,6 +27,11 @@
     <button (click)="add(userName.value, password.value, this.radioData)">
         Sign In
     </button>
+    <div *ngIf="alreadyExist">
+        <br/>
+        <p>This username is already taken.</p>
+        <p>Please choose another one.</p>
+    </div>
     <br/>
     <h2>Already registered?</h2>
         <nav>

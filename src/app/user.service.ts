@@ -28,15 +28,12 @@ export class UserService {
     return this.http.delete<User>(url)
   }
 
-  addUser(user: User): Observable<User> {
-    return this.http.post<User>(this.userUrl, user, this.httpOptions)
+  addUser(user: User): Observable<boolean> {
+    return this.http.post<boolean>(this.userUrl, user, this.httpOptions)
   }
 
-  //checkUser(userName: string, password: string): Observable<number> {
-  //  const name = userName;
-  //  const pass = password;
-  //  const url = `${this.userUrl}/${name}/${pass}`;
-  //  return this.http.get<number>(url)
+  //addUser(user: User): Observable<User> {
+  //  return this.http.post<User>(this.userUrl, user, this.httpOptions)
   //}
 
   checkUser(user: User): Observable<User> {

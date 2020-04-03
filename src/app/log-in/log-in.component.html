@@ -16,3 +16,11 @@
     <button (click)="check(userName.value, password.value)">
         Log In
     </button>
+    <br/>
+    <div *ngIf="!isRegistered">
+        <p>Your username/password isn't valid</p>
+        <h2>Not registered yet?</h2>
+        <nav>
+            <a routerLink="">Register Here</a>
+        </nav>
+    </div>

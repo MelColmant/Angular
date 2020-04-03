@@ -9,7 +9,7 @@ import { Router } from '@angular/router'
   styleUrls: ['./log-in.component.css']
 })
 export class LogInComponent implements OnInit {
-  myUser : User;
+  isRegistered : boolean;
 
   constructor(
     private userService: UserService,
@@ -17,12 +17,29 @@ export class LogInComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.isRegistered = true;
   }
 
-  check(userName : string, password : string){
-    this.userService.checkUser({ userName, password } as User)
+  check(UserName : string, Password : string){
+    this.userService.checkUser({ UserName, Password } as User)
       .subscribe(user => {
-        console.log('UserId: ' + user.userId);
+        if (user.UserId != 0)
+        {
+          localStorage.setItem('UserId', user.UserId.toString())
+          localStorage.setItem('UserName', user.UserName);
+          if (user.IsAdmin)
+          {
+            localStorage.setItem('IsAdmin', 'true');
+          }
+          else 
+          {
+            localStorage.setItem('IsAdmin', 'false');
+          }
+        }
+        else 
+        {
+          this.isRegistered = false;
+        }
       });
   }
 
