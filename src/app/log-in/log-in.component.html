@@ -1,0 +1,18 @@
+<h2>Log In</h2>
+
+    <diV>
+    <label>Username:
+        <input #userName required/>
+    </label>
+    </diV>
+    <br/>
+    <div>
+    <label>Password:
+        <input type="password" #password required/>
+    </label>
+    </div>
+
+    <br/>
+    <button (click)="check(userName.value, password.value)">
+        Log In
+    </button>
