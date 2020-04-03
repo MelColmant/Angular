@@ -9,6 +9,7 @@ import { Router } from '@angular/router'
   styleUrls: ['./log-in.component.css']
 })
 export class LogInComponent implements OnInit {
+  myUser : User;
 
   constructor(
     private userService: UserService,
@@ -20,11 +21,9 @@ export class LogInComponent implements OnInit {
 
   check(userName : string, password : string){
     this.userService.checkUser({ userName, password } as User)
-      .subscribe(result => {
-        if (result !== 0)
-        {
-          this.router.navigate([''])
-        } 
+      .subscribe(user => {
+        console.log('UserId: ' + user.userId);
       });
   }
+
 }

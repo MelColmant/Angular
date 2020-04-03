@@ -29,7 +29,7 @@ export class SignInComponent implements OnInit {
   add(userName : string, password : string, isAdmin : boolean){
     this.userService.addUser({ userName, password, isAdmin } as User )
       .subscribe();
-    this.router.navigate(['/login'])
+      this.router.navigate(['/login'])
   }
 
 }

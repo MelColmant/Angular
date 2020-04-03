@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { User } from './user'; 
 
@@ -38,10 +39,9 @@ export class UserService {
   //  return this.http.get<number>(url)
   //}
 
-  checkUser(user: User): Observable<number> {
+  checkUser(user: User): Observable<User> {
     const url = `${this.userUrl}/check`;
-    return this.http.post<number>(url, user, this.httpOptions)
+    return this.http.post<User>(url, user, this.httpOptions)
   }
-
 
 }
