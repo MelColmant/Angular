@@ -1,0 +1,41 @@
+<h2>Make Your Choice</h2>
+
+    <div *ngIf="isAdmin">
+        <h4>Create a new tree</h4>
+
+            <button (click)="openCreate = !openCreate">
+                Create
+            </button>
+            
+            <div *ngIf="openCreate">
+                <br/>
+                <div>
+                    <label>Tree name:
+                        <input #treeName required/>
+                    </label>
+                </div>
+                <br/>
+                <div>
+                    <label>Description:
+                        <input #description/>
+                    </label>
+                </div>
+                <br/>
+                <div>
+                    <button (click)="createTree(treeName.value, description.value)">
+                        Create Tree
+                    </button>
+                </div>
+            </div>
+        <!--
+        <h4>Modify an existing tree</h4>
+
+            <button (click)="modify()">
+                Modify
+            </button>-->
+    </div>
+
+    <div>
+        <h4>View a tree</h4>
+    </div>
+

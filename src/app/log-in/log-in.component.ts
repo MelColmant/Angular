@@ -35,6 +35,7 @@ export class LogInComponent implements OnInit {
           {
             localStorage.setItem('IsAdmin', 'false');
           }
+          this.router.navigate(['/tree'])
         }
         else 
         {

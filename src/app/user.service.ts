@@ -1,9 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
-import { Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
-
+import { Observable } from 'rxjs';
 import { User } from './user'; 
 
 @Injectable({
@@ -31,10 +29,6 @@ export class UserService {
   addUser(user: User): Observable<boolean> {
     return this.http.post<boolean>(this.userUrl, user, this.httpOptions)
   }
-
-  //addUser(user: User): Observable<User> {
-  //  return this.http.post<User>(this.userUrl, user, this.httpOptions)
-  //}
 
   checkUser(user: User): Observable<User> {
     const url = `${this.userUrl}/check`;
