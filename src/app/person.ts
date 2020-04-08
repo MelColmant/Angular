@@ -6,4 +6,5 @@ export interface Person {
     BirthDate: Date;
     DeathDate: Date;
     TreeId: number;
+    Generation: number;
 }

@@ -6,6 +6,9 @@ import { PersonService } from '../person.service';
 import { Relationship } from '../relationship';
 import { RelationshipService } from '../relationship.service';
 
+import { ParentChild } from '../parentchild';
+import { ParentchildService } from '../parentchild.service';
+
 @Component({
   selector: 'app-canvas',
   templateUrl: './canvas.component.html',
@@ -21,7 +24,8 @@ export class CanvasComponent implements OnInit {
   isDown: boolean;
   dragTarget: any;
   boxes: Array<any>;
-  connectors: Array<any>;
+  connectorsRel: Array<any>;
+  connectorsPC: Array<any>;
   startX : number;
   startY : number;
   mouseX : number;
@@ -29,59 +33,111 @@ export class CanvasComponent implements OnInit {
 
   people : Person [];
   relationships : Relationship [];
+  parentchilds : ParentChild [];
 
   constructor(
     private personService: PersonService,
     private relationshipService: RelationshipService,
+    private parentchildService: ParentchildService
   ) { }
 
   ngOnInit() : void {
     this.ctx = this.canvas.nativeElement.getContext('2d');
     this.getAllFromTree();
   }
-
+  //get all people from this tree
   getAllFromTree(){
     let TreeId = +localStorage.getItem("TreeId")
     //the + allows to cast localStorage string into number
     this.personService.getPersonsByTree(TreeId)
       .subscribe(people => {
         this.people = people;
-        this.getAllRel();
+        this.getAllRelFromTree(TreeId);
       });
   }
-
-  getAllRel(){
-    this.relationshipService.getAll()
+  //get all relationships from this tree (partners/fiance/married)
+  getAllRelFromTree(id : number){
+    let TreeId = +localStorage.getItem("TreeId")
+    this.relationshipService.getAllByTree(id)
       .subscribe(relationships => {
         this.relationships = relationships;
+        this.getAllPCFromTree(TreeId)
+        //this.init();
+      });
+  }
+  //get all parent-children relationships from this tree
+  getAllPCFromTree(id : number){
+    this.parentchildService.getAllByTree(id)
+      .subscribe(parentchilds => {
+        this.parentchilds = parentchilds;
         this.init();
       });
+  }
+  //get the starting point for boxes of a specified generation
+  getStartPosition(boxLength: number, boxDistance: number, gen: number){
+    //-4 because of canvas element borders
+    var canvasWidth = (this.canvas.nativeElement.getBoundingClientRect().width) - 4;
+    var countGen = this.people.filter(item => item.Generation == gen).length;
+    var startBox = (canvasWidth/2) - (boxLength/2);
 
+    for (var i = 1; i < countGen; i++) {
+      startBox-= (boxDistance/2) + (boxLength)/2 ;
+    }
+    return startBox;
   }
 
   init() {
     this.offsetX = this.getElementOffset(this.canvas.nativeElement).left;
     this.offsetY = this.getElementOffset(this.canvas.nativeElement).top;
     this.boxes = [];
-    
     var j = 0;
+    var k = 0;
+    var gen = this.people[0].Generation;
+    var startBox = this.getStartPosition(100, 20, gen)
+
     for (var i =0; i < this.people.length; i++) {
       var val = this.people[i].PersonId;
-      this.boxes.push({
-      x: 100, y: 25 + j, w: 100, h:50, personId: val
-      });
-      j+= 70;
+      if (this.people[i].Generation == gen){
+        this.boxes.push({
+        x: startBox + k, y: 25 + j, w: 100, h:50, personId: val
+        });
+        k+= 120;
+      }
+      else {
+        gen = this.people[i].Generation;
+        startBox = this.getStartPosition(100, 20, gen)
+        k = 0;
+        this.boxes.push({
+          x: startBox + k , y: 95 + j, w: 100, h:50, personId: val
+          });
+          k+= 120;
+          j+= 70;
+      }
+      
     }
 
-    this.connectors = [];
+    this.connectorsRel = [];
     
     for (var i =0; i < this.relationships.length; i++) {
       var val1 = this.relationships[i].Person1Id;
       var val2 = this.relationships[i].Person2Id;
-      this.connectors.push({
-        person1Id : val1, person2Id : val2
+      var relType = this.relationships[i].RelationshipTypeCode;
+      this.connectorsRel.push({
+        person1Id : val1, person2Id : val2, relType : relType
       });
     }
+
+    this.connectorsPC = [];
+    
+    for (var i =0; i < this.parentchilds.length; i++) {
+      var val1 = this.parentchilds[i].Person1Id;
+      var val2 = this.parentchilds[i].Person2Id;
+      var isAdopted = this.parentchilds[i].IsAdopted;
+      this.connectorsPC.push({
+        person1Id : val1, person2Id : val2, isAdopted : isAdopted
+      });
+    }
+
     this.draw();
   }
 
@@ -103,14 +159,14 @@ export class CanvasComponent implements OnInit {
       box.x + 5, box.y + 18);
     }
     
-    for (var i = 0; i < this.connectors.length; i++) {
+    for (var i = 0; i < this.connectorsRel.length; i++) {
       for (var j = 0; j < this.boxes.length; j++) {
       
-      if (this.connectors[i].person1Id == this.boxes[j].personId)
+      if (this.connectorsRel[i].person1Id == this.boxes[j].personId)
         {
           var box1 = this.boxes[j];
         }
-      if (this.connectors[i].person2Id == this.boxes[j].personId)
+      if (this.connectorsRel[i].person2Id == this.boxes[j].personId)
         {
           var box2 = this.boxes[j];
         }
@@ -118,7 +174,14 @@ export class CanvasComponent implements OnInit {
       } 
 
       this.ctx.globalCompositeOperation = "destination-over";
-      this.ctx.strokeStyle = "LightBlue";
+      if (this.connectorsRel[i].relType == 'p'){
+        this.ctx.strokeStyle = "LightSkyBlue";
+      }
+      else if (this.connectorsRel[i].relType == 'f'){
+        this.ctx.strokeStyle = "SkyBlue";
+      }
+      else this.ctx.strokeStyle = "DeepSkyBlue";
+      
       this.ctx.beginPath();
       this.ctx.moveTo(box1.x + box1.w / 2, box1.y + box1.h / 2)
       this.ctx.lineTo(box2.x + box2.w / 2, box2.y + box2.h / 2)
@@ -128,20 +191,33 @@ export class CanvasComponent implements OnInit {
 
     }
 
-    //for (var i = 0; i < this.connectors.length; i++) {
-      //var connector = this.connectors[i];
-      //var box1 = this.boxes[this.connectors[i]];
-      //var box2 = this.boxes[this.connectors[i+1]];
-      //the lines should stay under the text
-      //this.ctx.globalCompositeOperation = "destination-over";
-      //this.ctx.strokeStyle = "LightBlue";
-      //this.ctx.beginPath();
-      //this.ctx.moveTo(box1.x + box1.w / 2, box1.y + box1.h / 2)
-      //this.ctx.lineTo(box2.x + box2.w / 2, box2.y + box2.h / 2)
-      //this.ctx.stroke();
+    for (var i = 0; i < this.connectorsPC.length; i++) {
+      for (var j = 0; j < this.boxes.length; j++) {
+      
+      if (this.connectorsPC[i].person1Id == this.boxes[j].personId)
+        {
+          var box1 = this.boxes[j];
+        }
+      if (this.connectorsPC[i].person2Id == this.boxes[j].personId)
+        {
+          var box2 = this.boxes[j];
+        }
+
+      } 
+
+      this.ctx.globalCompositeOperation = "destination-over";
+      if (this.connectorsPC[i].isAdopted == false){
+        this.ctx.strokeStyle = "Bisque";
+      }
+      else this.ctx.strokeStyle = "PeachPuff";
+      
+      this.ctx.beginPath();
+      this.ctx.moveTo(box1.x + box1.w / 2, box1.y + box1.h / 2)
+      this.ctx.lineTo(box2.x + box2.w / 2, box2.y + box2.h / 2)
+      this.ctx.stroke();
       //getting back to drawing on top of the rest
-      //this.ctx.globalCompositeOperation = "source-over";
-    //}
+      this.ctx.globalCompositeOperation = "source-over";
+    }
   }
 
   getElementOffset(element) {

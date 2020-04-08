@@ -2,14 +2,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { Observable } from 'rxjs';
-import { Relationship } from './relationship'; 
+import { ParentChild } from './parentchild'; 
 
 @Injectable({
   providedIn: 'root'
 })
-export class RelationshipService {
+export class ParentchildService {
 
-  private relationshipUrl = 'http://localhost:57102/API/Relationship';
+  private parentchildUrl = 'http://localhost:57102/API/ParentChild';
 
   httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json'})
@@ -19,9 +19,9 @@ export class RelationshipService {
     private http: HttpClient
   ) { }
 
-  getAllByTree(id : number): Observable<Relationship[]> {
+  getAllByTree(id : number): Observable<ParentChild[]> {
     const treeId = id;
-    const url = `${this.relationshipUrl}/FromTree/${treeId}`;
-    return this.http.get<Relationship[]>(url)
+    const url = `${this.parentchildUrl}/FromTree/${treeId}`;
+    return this.http.get<ParentChild[]>(url)
   }
 }

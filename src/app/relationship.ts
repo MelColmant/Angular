@@ -6,4 +6,5 @@ export interface Relationship {
     EndDate: Date;
     IsUnisex: boolean;
     RelationshipTypeCode: string;
+    TreeId: number;
 }
