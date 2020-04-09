@@ -23,4 +23,13 @@ export class TreeService {
     const url = `${this.treeUrl}WithId`;
     return this.http.post<number>(url, tree, this.httpOptions)
   }
+
+  getTrees(): Observable<Tree []> {
+    return this.http.get<Tree []>(this.treeUrl)
+  }
+
+  getTree(treeId: number): Observable<Tree> {
+    const url = `${this.treeUrl}/${treeId}`;
+    return this.http.get<Tree>(url)
+  }
 }

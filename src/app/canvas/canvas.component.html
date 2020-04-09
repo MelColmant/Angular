@@ -1,4 +1,10 @@
-<canvas #canvas (mousedown)="handleMouseDown($event)" (mouseup)="handleMouseUp($event)" 
-                (mouseout)="handleMouseOut($event)" (mousemove)="handleMouseMove($event)"
-                (dblclick)="handleMouseClick($event)"
-                width="800" height="500"></canvas>
+<div [hidden]='!isLoaded'>
+    <canvas #canvas (mousedown)="handleMouseDown($event)" (mouseup)="handleMouseUp($event)" 
+                    (mouseout)="handleMouseOut($event)" (mousemove)="handleMouseMove($event)"
+                    (dblclick)="handleMouseClick($event)"
+                    width="800" height="500"></canvas>
+</div>
+
+<div *ngIf='!isLoaded'>
+    <p>This tree is empty at the moment.</p>
+</div>

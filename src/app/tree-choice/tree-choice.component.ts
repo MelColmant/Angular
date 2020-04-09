@@ -12,6 +12,7 @@ export class TreeChoiceComponent implements OnInit {
 
   isAdmin : boolean;
   openCreate : boolean;
+  trees : Tree [];
 
   constructor(
     private treeService: TreeService,
@@ -19,8 +20,7 @@ export class TreeChoiceComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.start(localStorage.getItem("IsAdmin"));
-    this.openCreate = false;
+    this.getAllTrees();
   }
 
   start(comp: string){
@@ -39,5 +39,19 @@ export class TreeChoiceComponent implements OnInit {
         localStorage.setItem('TreeId', treeId.toString());
         this.router.navigate(['/tree/'+ treeId]);
       });
+  }
+
+  getAllTrees() {
+    this.treeService.getTrees()
+      .subscribe(trees => {
+        this.trees = trees;
+        this.start(localStorage.getItem("IsAdmin"));
+        this.openCreate = false;
+      });
+  }
+
+  onSelect(tree : Tree){
+    this.router.navigate(['/tree/'+ tree.TreeId]);
+    localStorage.setItem('TreeId', tree.TreeId.toString());
   }
 }

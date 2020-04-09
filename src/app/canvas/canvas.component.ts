@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, Input, ViewChild, ElementRef } from '@angular/core';
 
 import { Person } from '../person';
 import { PersonService } from '../person.service';
@@ -9,6 +9,8 @@ import { RelationshipService } from '../relationship.service';
 import { ParentChild } from '../parentchild';
 import { ParentchildService } from '../parentchild.service';
 
+import { Tree } from '../tree';
+
 @Component({
   selector: 'app-canvas',
   templateUrl: './canvas.component.html',
@@ -16,6 +18,7 @@ import { ParentchildService } from '../parentchild.service';
 })
 export class CanvasComponent implements OnInit {
 
+  @Input() tree: Tree;
   @ViewChild('canvas', { static: true})
   canvas: ElementRef<HTMLCanvasElement>;
   private ctx: CanvasRenderingContext2D;
@@ -34,6 +37,7 @@ export class CanvasComponent implements OnInit {
   people : Person [];
   relationships : Relationship [];
   parentchilds : ParentChild [];
+  isLoaded : boolean;
 
   constructor(
     private personService: PersonService,
@@ -42,27 +46,32 @@ export class CanvasComponent implements OnInit {
   ) { }
 
   ngOnInit() : void {
+    this.isLoaded = true;
     this.ctx = this.canvas.nativeElement.getContext('2d');
     this.getAllFromTree();
   }
   //get all people from this tree
   getAllFromTree(){
-    let TreeId = +localStorage.getItem("TreeId")
+    let TreeId = this.tree.TreeId;
     //the + allows to cast localStorage string into number
     this.personService.getPersonsByTree(TreeId)
       .subscribe(people => {
         this.people = people;
+        //want  to hide the canvas if there aren't any people in the tree
+        if (this.people === undefined || this.people.length == 0){
+          this.isLoaded = false;
+          return;
+        }
         this.getAllRelFromTree(TreeId);
       });
   }
   //get all relationships from this tree (partners/fiance/married)
   getAllRelFromTree(id : number){
-    let TreeId = +localStorage.getItem("TreeId")
+    let TreeId = this.tree.TreeId;
     this.relationshipService.getAllByTree(id)
       .subscribe(relationships => {
         this.relationships = relationships;
         this.getAllPCFromTree(TreeId)
-        //this.init();
       });
   }
   //get all parent-children relationships from this tree
@@ -87,8 +96,10 @@ export class CanvasComponent implements OnInit {
   }
 
   init() {
-    this.offsetX = this.getElementOffset(this.canvas.nativeElement).left;
-    this.offsetY = this.getElementOffset(this.canvas.nativeElement).top;
+    //Set up the initial offset
+    this.offsetX = this.canvas.nativeElement.getBoundingClientRect().left;
+    this.offsetY = this.canvas.nativeElement.getBoundingClientRect().top;
+    
     this.boxes = [];
     var j = 0;
     var k = 0;
@@ -220,13 +231,13 @@ export class CanvasComponent implements OnInit {
     }
   }
 
-  getElementOffset(element) {
-    var de = document.documentElement;
-    var box = element.getBoundingClientRect();
-    var top = box.left + window.pageXOffset - de.clientTop;
-    var left = box.left + window.pageXOffset - de.clientLeft;
-    return { top: top, left: left};
-  }
+  //getElementOffset(element) {
+  //  var de = document.documentElement;
+  //  var box = element.getBoundingClientRect();
+  //  var top = box.left + window.pageXOffset - de.clientTop;
+  //  var left = box.left + window.pageXOffset - de.clientLeft;
+  //  return { top: top, left: left};
+  //}
 
   hit(x, y) {
     for (var i = 0; i < this.boxes.length; i ++) {
@@ -248,6 +259,11 @@ export class CanvasComponent implements OnInit {
   }
 
   handleMouseDown(e) {
+
+    // need to update the offset if the user did scroll
+    this.offsetX = this.canvas.nativeElement.getBoundingClientRect().left;
+    this.offsetY = this.canvas.nativeElement.getBoundingClientRect().top;
+
     this.startX = +e.clientX - this.offsetX;
     this.startY = +e.clientY - this.offsetY;
 

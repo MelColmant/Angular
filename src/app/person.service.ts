@@ -24,4 +24,8 @@ export class PersonService {
     const url = `${this.personUrl}/AllTree/${treeId}`;
     return this.http.get<Person[]>(url)
   }
+
+  addPerson(person: Person): Observable<number> {
+    return this.http.post<number>(this.personUrl, person, this.httpOptions)
+  }
 }

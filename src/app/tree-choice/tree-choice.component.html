@@ -37,5 +37,16 @@
 
     <div>
         <h4>View a tree</h4>
+            <ul>
+                <li *ngFor="let tree of trees"
+                    (click)="onSelect(tree)">
+                    Tree name: {{tree.TreeName}} |
+                    Tree description: {{tree.Description}}
+                </li>
+
+            </ul>
+            
+
+            
     </div>
 

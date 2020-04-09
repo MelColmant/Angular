@@ -1,1 +1,48 @@
-<p>tree works!</p>
+<div *ngIf="isLoaded">
+    <h2>{{tree.TreeName}}</h2>
+    <p>{{tree.Description}}</p>
+    <h2>Add a person</h2>
+    <div>
+        <label>First name:
+            <input #firstName required/>
+        </label>
+    </div>
+    <br/>
+    <div>
+        <label>Last name:
+            <input #lastName required/>
+        </label>
+    </div>
+    <br/>
+    <p>Gender:</p>
+    <div>
+        <input type="radio" name="rights" [(ngModel)]="radioData" value="m" #male checked> 
+        <label for="male">Male</label>
+    </div>
+
+    <div>
+        <input type="radio" name="rights" [(ngModel)]="radioData" value="f" #female> 
+        <label for="female">Female</label>
+    </div>
+    <br/>
+    <div>
+        <label>Birth date:
+            <input type="date" #birthDate required/>
+        </label>
+    </div>
+    <br/>
+    <div>
+        <label>Death date:
+            <input type="date" #deathDate/>
+        </label>
+    </div>
+    <br/>
+    <div>
+        <button (click)="addPerson(firstName.value, lastName.value, this.radioData, 
+                                    birthDate.value, deathDate.value)">
+            Add Person
+        </button>
+    </div>
+    <br/>
+    <app-canvas [tree]="tree"></app-canvas>
+</div>
