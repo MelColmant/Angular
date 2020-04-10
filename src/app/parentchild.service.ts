@@ -24,4 +24,8 @@ export class ParentchildService {
     const url = `${this.parentchildUrl}/FromTree/${treeId}`;
     return this.http.get<ParentChild[]>(url)
   }
+
+  addParentChild(parentchild: ParentChild): Observable<number> {
+    return this.http.post<number>(this.parentchildUrl, parentchild, this.httpOptions)
+  }
 }

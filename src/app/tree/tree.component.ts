@@ -7,6 +7,12 @@ import { TreeService } from '../tree.service';
 import { Person } from '../person';
 import { PersonService } from '../person.service';
 
+import { ParentChild } from '../parentchild';
+import { ParentchildService } from '../parentchild.service';
+
+import { Relationship } from '../relationship';
+import { RelationshipService } from '../relationship.service';
+
 import { Subject } from 'rxjs';
 
 @Component({
@@ -19,24 +25,30 @@ export class TreeComponent implements OnInit {
   treeId : number;
   tree : Tree;
   people: Person [];
+  parents: Person [];
+  newPersonId: number;
   // need to wait for the tree object to be filled before
   // passing it through the canvas element in the html
   isLoaded: boolean;
-  // for the forms
+  // items needed when adding a new person via form
   radioData: string;
-  // to reload the child component (canvas) on new input
-  eventsSubject: Subject<void> = new Subject<void>();
-  // items needed when adding a person
   selectedPerson: Person;
   listRel: Array<object>;
   selectedRel: any;
   firstname: string;
   lastname: string;
+  startDate: any;
+  endDate?: any;
+  // to reload the child component (canvas) on new input
+  eventsSubject: Subject<void> = new Subject<void>();
+  
 
   constructor(
     private route: ActivatedRoute,
     private treeService: TreeService,
     private personService: PersonService,
+    private parentchildService: ParentchildService,
+    private relationshipService: RelationshipService,
   ) { }
 
   ngOnInit(): void {
@@ -60,8 +72,41 @@ export class TreeComponent implements OnInit {
     let TreeId = this.treeId;
     this.personService.addPerson({ FirstName, LastName, Gender,
                                   BirthDate, DeathDate, TreeId, Generation } as Person)
+      .subscribe(personId =>{
+        this.newPersonId = personId;
+        if (this.selectedRel.rel == 'Parent'){
+          this.addParentChild(personId, this.selectedPerson.PersonId, false);
+        }
+        else if (this.selectedRel.rel == 'Child'){
+          this.addParentChild(this.selectedPerson.PersonId, personId, false);
+        }
+        else if (this.selectedRel.rel == "Sibling"){
+          this.getParents(this.selectedPerson.PersonId);
+        }
+        else if (this.selectedRel.code == "m" && this.selectedPerson.Gender == "m"){
+          this.addRelationship(this.selectedPerson.PersonId, personId, this.startDate,
+                              false, this.selectedRel.code, this.endDate)
+        }
+        //this.reloadChild(); Need to be remove when all methods finished
+      });
+  }
+
+  addParentChild(Person1Id : number, Person2Id: number, IsAdopted: boolean){
+    let TreeId = this.treeId;
+    this.parentchildService.addParentChild({ Person1Id, Person2Id, IsAdopted,
+                                          TreeId } as ParentChild)
       .subscribe(data =>{
-        this.reloadChild();
+      this.reloadChild();
+      });
+  }
+
+  addRelationship(Person1Id : number, Person2Id: number, StartDate: Date,
+                  IsUnisex: boolean, RelationshipTypeCode: string, EndDate?: Date){
+    let TreeId = this.treeId;
+    this.relationshipService.addRelationship({ Person1Id, Person2Id, StartDate, EndDate,
+                                          IsUnisex, RelationshipTypeCode, TreeId } as Relationship)
+      .subscribe(data =>{
+      this.reloadChild();
       });
   }
 
@@ -71,11 +116,30 @@ export class TreeComponent implements OnInit {
       .subscribe(people => {
         this.people = people;
         this.listRel = [];
-        this.listRel.push({rel: 'Father', gen: 1}, {rel: 'Mother', gen: 1}, {rel: 'Partner', gen: 0},
-        {rel: 'Fiancé', gen: 0}, {rel: 'Husband/Spouse', gen: 0}, 
-        {rel: 'Brother', gen: 0}, {rel: 'Sister', gen: 0}, {rel: 'Child', gen: -1});
+        this.listRel.push({rel: 'Parent', gen: 1}, {rel: 'Partner', gen: 0, code: 'p'},
+        {rel: 'Fiancé', gen: 0, code: 'f'}, {rel: 'Spouse', gen: 0, code: 'm'}, 
+        {rel: 'Sibling', gen: 0}, {rel: 'Child', gen: -1});
         this.isLoaded = true;
       });
+  }
+
+  getParents(personId: number){
+    this.personService.getParents(personId)
+      .subscribe(parents => {
+        this.parents = parents;
+        if (this.parents.length == 0){
+          this.reloadChild();
+          return;
+        }
+        for (var i=0; i<this.parents.length; i++){
+          this.addParentChild(this.parents[i].PersonId, this.newPersonId, false);
+        }
+      })
+  }
+
+  storeDates(startDate, endDate){
+    this.startDate = startDate;
+    this.endDate = endDate;
   }
 
   reloadChild() {

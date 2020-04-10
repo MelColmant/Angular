@@ -24,4 +24,8 @@ export class RelationshipService {
     const url = `${this.relationshipUrl}/FromTree/${treeId}`;
     return this.http.get<Relationship[]>(url)
   }
+
+  addRelationship(relationship: Relationship): Observable<number> {
+    return this.http.post<number>(this.relationshipUrl, relationship, this.httpOptions)
+  }
 }

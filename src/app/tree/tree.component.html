@@ -60,11 +60,31 @@
                 </label>
             </div>
             <br/>
+
+            <div [hidden]="!(selectedPerson && ((selectedRel.code  == 'p') || (selectedRel.code  == 'f') 
+                                            || (selectedRel.code  == 'm')))">
+                <h2>Information about the {{ selectedRel.rel | lowercase }} relationship</h2>
+                <div>
+                    <label>Start date:
+                    <input type="date" #startDate required/>
+                    </label>
+                </div>
+                <br/>
+                <div>
+                    <label>End date:
+                    <input type="date" #endDate/>
+                    </label>
+                </div>
+            </div>
+            <br/>
+                <!-- "startDate.value.length != 0" checks if it has a value. If so, call
+                    storeDates--> 
                 <button (click)="addPerson(firstName.value, lastName.value, this.radioData, 
                                     birthDate.value, selectedPerson.Generation + selectedRel.gen, 
-                                    deathDate.value)">
+                                    deathDate.value) ; startDate.value.length != 0 && 
+                                    storeDates(startDate.value, endDate.value)">
                 Add {{ firstname }} {{ lastname }} to your tree
-                </button>
+                </button>  
         </div>
     
     </div>
