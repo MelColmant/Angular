@@ -1,48 +1,72 @@
 <div *ngIf="isLoaded">
     <h2>{{tree.TreeName}}</h2>
     <p>{{tree.Description}}</p>
+    <app-canvas [tree]="tree" [events]="eventsSubject.asObservable()"></app-canvas>
     <h2>Add a person</h2>
     <div>
-        <label>First name:
-            <input #firstName required/>
-        </label>
-    </div>
-    <br/>
-    <div>
-        <label>Last name:
-            <input #lastName required/>
-        </label>
-    </div>
-    <br/>
-    <p>Gender:</p>
-    <div>
-        <input type="radio" name="rights" [(ngModel)]="radioData" value="m" #male checked> 
-        <label for="male">Male</label>
-    </div>
+        <h3>Who is this person related to?</h3>
+        <ul class="list">
+            <li *ngFor="let person of people"
+                [class.selected]="person == selectedPerson"
+                (click)="onSelect(person)">
+                {{person.FirstName}} {{person.LastName}}
+            </li>
+        </ul>
 
-    <div>
-        <input type="radio" name="rights" [(ngModel)]="radioData" value="f" #female> 
-        <label for="female">Female</label>
+        <div *ngIf="selectedPerson">
+            <h3>What is the relationship between them?</h3>
+                <ul class="list">
+                    <li *ngFor="let relation of listRel"
+                        [class.selected]="relation == selectedRel"
+                        (click)="onSelectRel(relation)">
+                        {{ relation.rel }}
+                    </li>
+                </ul>
+        </div>
+        
+        <div *ngIf="selectedPerson && selectedRel">
+            <div>
+            <h2>Information about the {{ selectedRel.rel | lowercase }} of 
+                {{ selectedPerson.FirstName }} {{ selectedPerson.LastName }}</h2>
+                <label>First name:
+                    <input [(ngModel)]="firstname" #firstName required/>
+                </label>
+            </div>
+            <br/>
+            <div>
+                <label>Last name:
+                    <input [(ngModel)]="lastname" #lastName required/>
+                </label>
+            </div>
+            <p>Gender:</p>
+            <div>
+                <input type="radio" name="rights" [(ngModel)]="radioData" value="m" #male checked> 
+                <label for="male">Male</label>
+            </div>
+            <div>
+                <input type="radio" name="rights" [(ngModel)]="radioData" value="f" #female> 
+                <label for="female">Female</label>
+            </div>
+            <br/>
+            <div>
+                <label>Birth date:
+                <input type="date" #birthDate required/>
+                </label>
+            </div>
+            <br/>
+            <div>
+                <label>Death date:
+                <input type="date" #deathDate/>
+                </label>
+            </div>
+            <br/>
+                <button (click)="addPerson(firstName.value, lastName.value, this.radioData, 
+                                    birthDate.value, selectedPerson.Generation + selectedRel.gen, 
+                                    deathDate.value)">
+                Add {{ firstname }} {{ lastname }} to your tree
+                </button>
+        </div>
+    
     </div>
-    <br/>
-    <div>
-        <label>Birth date:
-            <input type="date" #birthDate required/>
-        </label>
-    </div>
-    <br/>
-    <div>
-        <label>Death date:
-            <input type="date" #deathDate/>
-        </label>
-    </div>
-    <br/>
-    <div>
-        <button (click)="addPerson(firstName.value, lastName.value, this.radioData, 
-                                    birthDate.value, deathDate.value)">
-            Add Person
-        </button>
-    </div>
-    <br/>
-    <app-canvas [tree]="tree"></app-canvas>
+    
 </div>

@@ -10,6 +10,8 @@ import { ParentChild } from '../parentchild';
 import { ParentchildService } from '../parentchild.service';
 
 import { Tree } from '../tree';
+import { Subscription, Observable } from 'rxjs';
+
 
 @Component({
   selector: 'app-canvas',
@@ -17,6 +19,10 @@ import { Tree } from '../tree';
   styleUrls: ['./canvas.component.css']
 })
 export class CanvasComponent implements OnInit {
+
+  private eventsSubscription: Subscription;
+  @Input() events: Observable<void>;
+
 
   @Input() tree: Tree;
   @ViewChild('canvas', { static: true})
@@ -46,9 +52,19 @@ export class CanvasComponent implements OnInit {
   ) { }
 
   ngOnInit() : void {
+    //listening to parent events to reload canvas when needed
+    this.eventsSubscription = this.events.subscribe(() => this.reload());
     this.isLoaded = true;
     this.ctx = this.canvas.nativeElement.getContext('2d');
     this.getAllFromTree();
+  }
+
+  reload(){
+    this.ngOnInit();
+  }
+
+  ngOnDestroy() {
+    this.eventsSubscription.unsubscribe();
   }
   //get all people from this tree
   getAllFromTree(){
@@ -230,14 +246,6 @@ export class CanvasComponent implements OnInit {
       this.ctx.globalCompositeOperation = "source-over";
     }
   }
-
-  //getElementOffset(element) {
-  //  var de = document.documentElement;
-  //  var box = element.getBoundingClientRect();
-  //  var top = box.left + window.pageXOffset - de.clientTop;
-  //  var left = box.left + window.pageXOffset - de.clientLeft;
-  //  return { top: top, left: left};
-  //}
 
   hit(x, y) {
     for (var i = 0; i < this.boxes.length; i ++) {

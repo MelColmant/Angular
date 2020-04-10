@@ -4,5 +4,30 @@ li {
 }
 
 li:hover {
-    background-color: lightgrey;
+    background-color: lightsteelblue;
+}
+
+.list {
+    margin: 0 0 2px 0;
+    list-style-type: none;
+    border: 1px solid black;
+    padding: 5px;
+    display: inline-block;
+}
+
+button {
+    background-color: white;
+    border: 1px lightsalmon solid;
+    border-radius: 4px;
+    color: black;
+    text-align: center;
+    display: inline-block;
+    font-size: 16px;
+    padding: 4px 6px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: lightsalmon;
+    color: white;
 }
