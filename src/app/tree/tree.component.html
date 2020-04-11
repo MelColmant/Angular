@@ -1,92 +1,210 @@
 <div *ngIf="isLoaded">
+    
     <h2>{{tree.TreeName}}</h2>
     <p>{{tree.Description}}</p>
     <app-canvas [tree]="tree" [events]="eventsSubject.asObservable()"></app-canvas>
-    <h2>Add a person</h2>
-    <div>
-        <h3>Who is this person related to?</h3>
-        <ul class="list">
-            <li *ngFor="let person of people"
-                [class.selected]="person == selectedPerson"
-                (click)="onSelect(person)">
-                {{person.FirstName}} {{person.LastName}}
-            </li>
-        </ul>
 
-        <div *ngIf="selectedPerson">
-            <h3>What is the relationship between them?</h3>
+    <div id="container">
+        <div id="right">
+            <h2>Add a person</h2>
+            <div>
+                <h3>Who is this person related to?</h3>
                 <ul class="list">
-                    <li *ngFor="let relation of listRel"
-                        [class.selected]="relation == selectedRel"
-                        (click)="onSelectRel(relation)">
-                        {{ relation.rel }}
+                    <li *ngFor="let person of people"
+                        [class.selected]="person == selectedPerson"
+                        (click)="onSelect(person)">
+                        {{person.FirstName}} {{person.LastName}}
                     </li>
                 </ul>
-        </div>
-        
-        <div *ngIf="selectedPerson && selectedRel">
-            <div>
-            <h2>Information about the {{ selectedRel.rel | lowercase }} of 
-                {{ selectedPerson.FirstName }} {{ selectedPerson.LastName }}</h2>
-                <label>First name:
-                    <input [(ngModel)]="firstname" #firstName required/>
-                </label>
-            </div>
-            <br/>
-            <div>
-                <label>Last name:
-                    <input [(ngModel)]="lastname" #lastName required/>
-                </label>
-            </div>
-            <p>Gender:</p>
-            <div>
-                <input type="radio" name="rights" [(ngModel)]="radioData" value="m" #male checked> 
-                <label for="male">Male</label>
-            </div>
-            <div>
-                <input type="radio" name="rights" [(ngModel)]="radioData" value="f" #female> 
-                <label for="female">Female</label>
-            </div>
-            <br/>
-            <div>
-                <label>Birth date:
-                <input type="date" #birthDate required/>
-                </label>
-            </div>
-            <br/>
-            <div>
-                <label>Death date:
-                <input type="date" #deathDate/>
-                </label>
-            </div>
-            <br/>
 
-            <div [hidden]="!(selectedPerson && ((selectedRel.code  == 'p') || (selectedRel.code  == 'f') 
-                                            || (selectedRel.code  == 'm')))">
-                <h2>Information about the {{ selectedRel.rel | lowercase }} relationship</h2>
-                <div>
-                    <label>Start date:
-                    <input type="date" #startDate required/>
-                    </label>
+                <div *ngIf="selectedPerson">
+                    <h3>What is the relationship between them?</h3>
+                        <ul class="list">
+                            <li *ngFor="let relation of listRel"
+                                [class.selected]="relation == selectedRel"
+                                (click)="onSelectRel(relation)">
+                                {{ relation.rel }}
+                            </li>
+                        </ul>
                 </div>
-                <br/>
-                <div>
-                    <label>End date:
-                    <input type="date" #endDate/>
-                    </label>
+        
+                <div *ngIf="selectedPerson && selectedRel">
+                    <div>
+                    <h2>Information about the {{ selectedRel.rel | lowercase }} of 
+                        {{ selectedPerson.FirstName }} {{ selectedPerson.LastName }}</h2>
+                        <label>First name:
+                            <input [(ngModel)]="firstname" #firstName required/>
+                        </label>
+                    </div>
+                    <br/>
+                    <div>
+                        <label>Last name:
+                            <input [(ngModel)]="lastname" #lastName required/>
+                        </label>
+                    </div>
+
+                    <p>Gender:</p>
+                    <div>
+                        <input type="radio" name="rights" [(ngModel)]="radioData" value="m" #male checked> 
+                        <label for="male">Male</label>
+                    </div>
+                    <div>
+                        <input type="radio" name="rights" [(ngModel)]="radioData" value="f" #female> 
+                        <label for="female">Female</label>
+                    </div>
+                    <br/>
+                    <div>
+                        <label>Birth date:
+                            <input type="date" #birthDate required/>
+                        </label>
+                    </div>
+                    <br/>
+                    <div>
+                        <label>Death date:
+                            <input type="date" #deathDate/>
+                        </label>
+                    </div>
+                    <br/>
+
+                    <div [hidden]="!(selectedPerson && ((selectedRel.code  == 'p') || 
+                                    (selectedRel.code  == 'f') || (selectedRel.code  == 'm')))">
+                        <h2>Information about the {{ selectedRel.rel | lowercase }} relationship</h2>
+                        <div>
+                            <label>Start date:
+                                <input type="date" #startDate required/>
+                            </label>
+                        </div>
+                        <br/>
+                        <div>
+                            <label>End date:
+                                <input type="date" #endDate/>
+                            </label>
+                        </div>
+                    </div>
+                    <br/>
+                        <!-- "startDate.value.length != 0" checks if it has a value. If so, call
+                        storeDates--> 
+                        <button (click)="addPerson(firstName.value, lastName.value, this.radioData, 
+                                        birthDate.value, selectedPerson.Generation + selectedRel.gen, 
+                                        deathDate.value) ; startDate.value.length != 0 && 
+                                        storeDates(startDate.value, endDate.value)">
+                        Add {{ firstname }} {{ lastname }} to your tree
+                        </button>  
                 </div>
-            </div>
-            <br/>
-                <!-- "startDate.value.length != 0" checks if it has a value. If so, call
-                    storeDates--> 
-                <button (click)="addPerson(firstName.value, lastName.value, this.radioData, 
-                                    birthDate.value, selectedPerson.Generation + selectedRel.gen, 
-                                    deathDate.value) ; startDate.value.length != 0 && 
-                                    storeDates(startDate.value, endDate.value)">
-                Add {{ firstname }} {{ lastname }} to your tree
-                </button>  
-        </div>
     
+            </div>
+
+        </div>
+
+        <div id="left">
+            <h2>Add a relationship</h2>
+            <div>
+                <div id="left_left">
+                    <h3>Between: </h3>
+                        <ul class="list">
+                            <li *ngFor="let person of people"
+                                [class.selected]="person == selectedPerson1"
+                                (click)="onSelectP1(person)">
+                                {{person.FirstName}} {{person.LastName}}
+                            </li>
+                        </ul>
+                </div>
+
+                <div id="left_right">
+                    <h3>And: </h3>
+                        <ul class="list">
+                            <li *ngFor="let person of people"
+                                [class.selected]="person == selectedPerson2"
+                                (click)="onSelectP2(person)">
+                                {{person.FirstName}} {{person.LastName}}
+                            </li>
+                        </ul>
+                </div>
+
+                <div class="clear"></div>
+
+                <div *ngIf="selectedPerson1 && selectedPerson2 && selectedPerson1 != selectedPerson2">
+                    <h3>What is the relationship between them?</h3>
+                        <ul class="list">
+                            <li *ngFor="let relation of listRel"
+                                [class.selected]="relation == selectedRel2"
+                                (click)="onSelectRel2(relation)">
+                                {{ relation.rel }}
+                            </li>
+                        </ul>
+
+                    <div *ngIf="selectedRel2">
+                        <h2>Is {{ selectedPerson2.FirstName }} {{ selectedPerson2.LastName }}
+                            the {{ selectedRel2.rel | lowercase }} 
+                            of {{ selectedPerson1.FirstName }} {{ selectedPerson1.LastName }}?
+                        </h2>
+
+                        <div *ngIf="selectedRel2.rel == 'Parent'">
+                            <button (click)="addParentChild(selectedPerson2.PersonId,
+                                            selectedPerson1.PersonId, false)">
+                                Add relationship to your tree
+                            </button> 
+                        </div>
+
+                        <div *ngIf="selectedRel2.rel == 'Child'">
+                            <button (click)="addParentChild(selectedPerson1.PersonId,
+                                            selectedPerson2.PersonId, false)">
+                                Add relationship to your tree
+                            </button> 
+                        </div>
+
+                        <div *ngIf="selectedRel2.rel == 'Sibling'">
+                            <button (click)="getParents2(selectedPerson1.PersonId,
+                                            selectedPerson2.PersonId)">
+                                Add relationship to your tree
+                            </button> 
+                        </div>
+
+                        <div *ngIf="(selectedPerson1 && selectedPerson2 && 
+                                    ((selectedRel2.code  == 'p') || (selectedRel2.code  == 'f') 
+                                    || (selectedRel2.code  == 'm')))">
+                            <h2>Information about the {{ selectedRel2.rel | lowercase }} relationship</h2>
+                                <div>
+                                    <label>Start date:
+                                        <input type="date" #startDate required/>
+                                    </label>
+                                </div>
+                                <br/>
+                                <div>
+                                    <label>End date:
+                                        <input type="date" #endDate/>
+                                    </label>
+                                </div>
+                                <br/>
+                                <div *ngIf="selectedPerson1.Gender == 'm'">
+                                <button (click)="addRelationship(selectedPerson1.PersonId,
+                                            selectedPerson2.PersonId, startDate.value, false,
+                                            selectedRel2.code, endDate.value)">
+                                    Add relationship to your tree
+                                </button> 
+                                </div>
+                                
+                                <div *ngIf="selectedPerson1.Gender == 'f'">
+                                    <button (click)="addRelationship(selectedPerson2.PersonId,
+                                                selectedPerson1.PersonId, startDate.value, false,
+                                                selectedRel2.code, endDate.value)">
+                                        Add relationship to your tree
+                                    </button> 
+                                    </div>
+
+                                
+                        </div>
+
+                    </div>
+
+                </div>
+                
+            </div>
+
+        </div>
+
+        <div class="clear"></div>
+
     </div>
     
 </div>

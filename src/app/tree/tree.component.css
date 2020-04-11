@@ -35,3 +35,35 @@ button:hover {
     background-color: lightsalmon;
     color: white;
 }
+
+#canvas {
+    width: 300px;
+}
+
+#container {
+    width: 100%;
+}
+
+#left {
+    width: 50%;
+    float: left;
+}
+
+#left_left {
+    width: 25%;
+    float: left;
+}
+
+#left_right {
+    width: 25%;
+    float: left;
+}
+
+#right {
+    width: 50%;
+    float: left;
+}
+
+.clear {
+    clear: both;
+}

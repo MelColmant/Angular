@@ -26,6 +26,7 @@ export class TreeComponent implements OnInit {
   tree : Tree;
   people: Person [];
   parents: Person [];
+  parents2: Person [];
   newPersonId: number;
   // need to wait for the tree object to be filled before
   // passing it through the canvas element in the html
@@ -33,8 +34,11 @@ export class TreeComponent implements OnInit {
   // items needed when adding a new person via form
   radioData: string;
   selectedPerson: Person;
+  selectedPerson1: Person;
+  selectedPerson2: Person;
   listRel: Array<object>;
   selectedRel: any;
+  selectedRel2: any;
   firstname: string;
   lastname: string;
   startDate: any;
@@ -74,10 +78,10 @@ export class TreeComponent implements OnInit {
                                   BirthDate, DeathDate, TreeId, Generation } as Person)
       .subscribe(personId =>{
         this.newPersonId = personId;
-        if (this.selectedRel.rel == 'Parent'){
+        if (this.selectedRel.rel == "Parent"){
           this.addParentChild(personId, this.selectedPerson.PersonId, false);
         }
-        else if (this.selectedRel.rel == 'Child'){
+        else if (this.selectedRel.rel == "Child"){
           this.addParentChild(this.selectedPerson.PersonId, personId, false);
         }
         else if (this.selectedRel.rel == "Sibling"){
@@ -87,7 +91,27 @@ export class TreeComponent implements OnInit {
           this.addRelationship(this.selectedPerson.PersonId, personId, this.startDate,
                               false, this.selectedRel.code, this.endDate)
         }
-        //this.reloadChild(); Need to be remove when all methods finished
+        else if (this.selectedRel.code == "f" && this.selectedPerson.Gender == "m"){
+          this.addRelationship(this.selectedPerson.PersonId, personId, this.startDate,
+                              false, this.selectedRel.code, this.endDate)
+        }
+        else if (this.selectedRel.code == "p" && this.selectedPerson.Gender == "m"){
+          this.addRelationship(this.selectedPerson.PersonId, personId, this.startDate,
+                              false, this.selectedRel.code, this.endDate)
+        }
+        else if (this.selectedRel.code == "m" && this.selectedPerson.Gender == "f"){
+          this.addRelationship(personId, this.selectedPerson.PersonId, this.startDate,
+                              false, this.selectedRel.code, this.endDate)
+        }
+        else if (this.selectedRel.code == "f" && this.selectedPerson.Gender == "f"){
+          this.addRelationship(personId, this.selectedPerson.PersonId, this.startDate,
+                              false, this.selectedRel.code, this.endDate)
+        }
+        else if (this.selectedRel.code == "p" && this.selectedPerson.Gender == "f"){
+          this.addRelationship(personId, this.selectedPerson.PersonId, this.startDate,
+                              false, this.selectedRel.code, this.endDate)
+        }
+
       });
   }
 
@@ -137,6 +161,33 @@ export class TreeComponent implements OnInit {
       })
   }
 
+  getParents2(person1Id: number, person2Id: number){
+    this.personService.getParents(person1Id)
+      .subscribe(parents => {
+        this.parents = parents;
+        this.personService.getParents(person2Id)
+          .subscribe(parents2 =>{
+            this.parents2 = parents2;
+            if (this.parents == this.parents2){
+              return;
+            }
+            else if (this.parents.length > this.parents2.length){
+              let newArray = this.parents.filter(({PersonId: id1}) => !(this.parents2.some(({ PersonId: id2 }) => id2 == id1)));
+              console.log("new Array :"+ newArray.length)
+              for (var i=0; i<newArray.length; i++){
+                this.addParentChild(newArray[i].PersonId, person2Id, false);
+              }
+            }
+            else {
+              let newArray = this.parents2.filter(({PersonId: id1}) => !(this.parents.some(({ PersonId: id2 }) => id2 == id1)));
+              for (var i=0; i<newArray.length; i++){
+                this.addParentChild(newArray[i].PersonId, person1Id, false);
+              }
+            }
+          })
+        })  
+  }
+
   storeDates(startDate, endDate){
     this.startDate = startDate;
     this.endDate = endDate;
@@ -150,8 +201,19 @@ export class TreeComponent implements OnInit {
     this.selectedPerson = person;
   }
 
+  onSelectP1(person : Person){
+    this.selectedPerson1 = person;
+  }
+
+  onSelectP2(person : Person){
+    this.selectedPerson2 = person;
+  }
+
   onSelectRel(relation : object) {
     this.selectedRel = relation;
+  }
 
+  onSelectRel2(relation : object) {
+    this.selectedRel2 = relation;
   }
 }
