@@ -44,4 +44,13 @@ export class LogInComponent implements OnInit {
       });
   }
 
+  check2(UserName : string, Password : string){
+    this.userService.checkUser2({ UserName, Password } as User)
+      .subscribe(token => {
+            localStorage.setItem('JWTToken', token);
+      });
+
+  }
+  
 }
+

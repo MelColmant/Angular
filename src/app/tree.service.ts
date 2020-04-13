@@ -11,8 +11,11 @@ export class TreeService {
 
   private treeUrl = 'http://localhost:57102/API/Tree';
 
+  private token = localStorage.getItem('JWTToken')
+
   httpOptions = {
-    headers: new HttpHeaders({ 'Content-Type': 'application/json'})
+    headers: new HttpHeaders({ 'Content-Type': 'application/json', 
+    'Authorization': 'Bearer ' + this.token})
   };
 
   constructor(

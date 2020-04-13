@@ -35,4 +35,10 @@ export class UserService {
     return this.http.post<User>(url, user, this.httpOptions)
   }
 
+  checkUser2(user: User): Observable<string> {
+    const url = 'http://localhost:57102/API/login';
+    return this.http.post<string>(url, user, this.httpOptions)
+  }
+
+
 }
