@@ -44,6 +44,13 @@ export class CanvasComponent implements OnInit {
   relationships : Relationship [];
   parentchilds : ParentChild [];
   isLoaded : boolean;
+  //setting up canvas related variables
+  canvasWidth: number;
+  canvasHeight: number;
+  boxWidth: number;
+  spaceWidth: number;
+  boxHeight: number;
+  spaceHeight: number;
 
   constructor(
     private personService: PersonService,
@@ -52,6 +59,9 @@ export class CanvasComponent implements OnInit {
   ) { }
 
   ngOnInit() : void {
+    //setting up initial width and height
+    this.canvasWidth=1;
+    this.canvasHeight=1;
     //listening to parent events to reload canvas when needed
     this.eventsSubscription = this.events.subscribe(() => this.reload());
     this.isLoaded = true;
@@ -78,6 +88,9 @@ export class CanvasComponent implements OnInit {
           this.isLoaded = false;
           return;
         }
+        //Set up canvas size based on generations and box height (canvas height)
+        //as well as max people in generation and box width (canvas width)
+        this.setCanvas(100, 20, 50, 20);
         this.getAllRelFromTree(TreeId);
       });
   }
@@ -98,47 +111,99 @@ export class CanvasComponent implements OnInit {
         this.init();
       });
   }
-  //get the starting point for boxes of a specified generation
-  getStartPosition(boxLength: number, boxDistance: number, gen: number){
-    //-4 because of canvas element borders
-    var canvasWidth = (this.canvas.nativeElement.getBoundingClientRect().width) - 4;
-    var countGen = this.people.filter(item => item.Generation == gen).length;
-    var startBox = (canvasWidth/2) - (boxLength/2);
-
-    for (var i = 1; i < countGen; i++) {
-      startBox-= (boxDistance/2) + (boxLength)/2 ;
+  //get the amount of generations in current tree
+  genAmount(){
+    var amount = 1;
+    var gen = this.people[0].Generation;
+    for (var i = 0; i<this.people.length; i++){
+      if (this.people[i].Generation != gen){
+        amount += 1;
+        gen = this.people[i].Generation
+      } 
     }
-    return startBox;
+    return amount;
+  }
+  //get the maximum amount of people in a generation for current tree
+  maxGen(){
+    var maxAmount = 0;
+    var amount = 0;
+    var gen= this.people[0].Generation;
+    for (var i = 0; i <this.people.length; i++){
+      if (this.people[i].Generation == gen){
+        amount += 1;
+        if(amount > maxAmount){
+          maxAmount = amount;
+        }
+      }else{
+        amount = 1;
+        gen = this.people[i].Generation;
+      }
+    }
+    return maxAmount;
+  }
+  //set up the canvas dimension, based on genAmount & maxGen
+  setCanvas(boxWidth: number, spaceWidth: number, boxHeight: number, spaceHeight: number){
+    //initialize the global variables related to the canvas
+    this.boxWidth = boxWidth;
+    this.spaceWidth = spaceWidth;
+    this.boxHeight = boxHeight;
+    this.spaceHeight = spaceHeight;;
+    var height = this.genAmount() * (boxHeight + 2 * spaceHeight);
+    this.canvasHeight = height;
+    var width = this.maxGen() * (boxWidth + 2 * spaceWidth);
+    this.canvasWidth = width;
+  }
+  
+  //get the starting point for boxes of a specified generation
+  getStartPositionX(gen: number){
+    var countGen = this.people.filter(item => item.Generation == gen).length;
+    var startBoxX = (this.canvasWidth/2) - (this.boxWidth/2);
+    
+    for (var i = 1; i < countGen; i++) {
+      startBoxX-= (this.spaceWidth/2) + (this.boxWidth)/2 ;
+    }
+    return startBoxX;
+  }
+
+  getStartPositionY(){
+    var amountGen = this.genAmount();
+    var startBoxY = (this.canvasHeight/2) - (this.boxHeight/2);
+    
+    for (var i = 1; i < amountGen; i++) {
+      startBoxY-= (this.spaceHeight/2) + (this.boxHeight)/2 ;
+    }
+    return startBoxY;
   }
 
   init() {
     //Set up the initial offset
     this.offsetX = this.canvas.nativeElement.getBoundingClientRect().left;
     this.offsetY = this.canvas.nativeElement.getBoundingClientRect().top;
-    
     this.boxes = [];
     var j = 0;
     var k = 0;
     var gen = this.people[0].Generation;
-    var startBox = this.getStartPosition(100, 20, gen)
+    var startBoxX = this.getStartPositionX(gen);
+    var startBoxY = this.getStartPositionY();
 
     for (var i =0; i < this.people.length; i++) {
       var val = this.people[i].PersonId;
       if (this.people[i].Generation == gen){
         this.boxes.push({
-        x: startBox + k, y: 25 + j, w: 100, h:50, personId: val
+        x: startBoxX + k, y: startBoxY + j, w: this.boxWidth, h: this.boxHeight, personId: val
         });
-        k+= 120;
+        k+= this.boxWidth + this.spaceWidth;
       }
       else {
         gen = this.people[i].Generation;
-        startBox = this.getStartPosition(100, 20, gen)
+        startBoxX = this.getStartPositionX(gen);
         k = 0;
         this.boxes.push({
-          x: startBox + k , y: 95 + j, w: 100, h:50, personId: val
+          x: startBoxX + k , y: startBoxY + this.boxHeight + this.spaceHeight + j, 
+          w: this.boxWidth, h: this.boxHeight, personId: val
           });
-          k+= 120;
-          j+= 70;
+          k+= this.boxWidth + this.spaceWidth;
+          j+= this.boxHeight + this.spaceHeight;
       }
       
     }
@@ -174,6 +239,7 @@ export class CanvasComponent implements OnInit {
 
     for (var i =0; i < this.boxes.length; i++) {
       var box = this.boxes[i];
+      console.log("box x, w :" + box.x + " " +box.w);
       if (this.people[i].Gender == "m")
       {
         this.ctx.fillStyle = "LightBlue";
@@ -271,10 +337,10 @@ export class CanvasComponent implements OnInit {
     // need to update the offset if the user did scroll
     this.offsetX = this.canvas.nativeElement.getBoundingClientRect().left;
     this.offsetY = this.canvas.nativeElement.getBoundingClientRect().top;
-
     this.startX = +e.clientX - this.offsetX;
     this.startY = +e.clientY - this.offsetY;
-
+    console.log("startX: " + this.startX);
+    console.log("startY: " + this.startY);
     this.isDown = this.hit(this.startX, this.startY);
   }
 
