@@ -1,5 +1,5 @@
 <div *ngIf="isLoaded">
-    
+    <app-delete-person [tree]="tree"></app-delete-person>
     <h2>{{tree.TreeName}}</h2>
     <p>{{tree.Description}}</p>
     <app-canvas [tree]="tree" [events]="eventsSubject.asObservable()"></app-canvas>

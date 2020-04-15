@@ -10,6 +10,7 @@ import { LogInComponent } from './log-in/log-in.component';
 import { TreeChoiceComponent } from './tree-choice/tree-choice.component';
 import { TreeComponent } from './tree/tree.component';
 import { CanvasComponent } from './canvas/canvas.component';
+import { DeletePersonComponent } from './delete-person/delete-person.component';
 
 @NgModule({
   declarations: [
@@ -18,14 +19,17 @@ import { CanvasComponent } from './canvas/canvas.component';
     LogInComponent,
     TreeChoiceComponent,
     TreeComponent,
-    CanvasComponent
+    CanvasComponent,
+    DeletePersonComponent
   ],
+
   imports: [
     BrowserModule,
     AppRoutingModule,
     FormsModule,
-    HttpClientModule
+    HttpClientModule,
   ],
+
   providers: [],
   bootstrap: [AppComponent]
 })

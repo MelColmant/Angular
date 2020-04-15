@@ -88,8 +88,8 @@ export class CanvasComponent implements OnInit {
           this.isLoaded = false;
           return;
         }
-        //Set up canvas size based on generations and box height (canvas height)
-        //as well as max people in generation and box width (canvas width)
+        //Set up canvas size based on generations, box height and space height (canvas height)
+        //as well as max people in generation, box width and space width (canvas width)
         this.setCanvas(100, 20, 50, 20);
         this.getAllRelFromTree(TreeId);
       });
@@ -154,7 +154,7 @@ export class CanvasComponent implements OnInit {
     this.canvasWidth = width;
   }
   
-  //get the starting point for boxes of a specified generation
+  //get the starting X value for boxes of a specified generation
   getStartPositionX(gen: number){
     var countGen = this.people.filter(item => item.Generation == gen).length;
     var startBoxX = (this.canvasWidth/2) - (this.boxWidth/2);
@@ -165,6 +165,7 @@ export class CanvasComponent implements OnInit {
     return startBoxX;
   }
 
+  //get the starting Y value for boxes of a specified generation
   getStartPositionY(){
     var amountGen = this.genAmount();
     var startBoxY = (this.canvasHeight/2) - (this.boxHeight/2);
@@ -239,7 +240,6 @@ export class CanvasComponent implements OnInit {
 
     for (var i =0; i < this.boxes.length; i++) {
       var box = this.boxes[i];
-      console.log("box x, w :" + box.x + " " +box.w);
       if (this.people[i].Gender == "m")
       {
         this.ctx.fillStyle = "LightBlue";
@@ -247,7 +247,7 @@ export class CanvasComponent implements OnInit {
       else this.ctx.fillStyle = "LightPink";
       this.ctx.fillRect(box.x, box.y, box.w, box.h);
       this.ctx.fillStyle = "Black";
-      this.ctx.font = "12px Arial";
+      this.ctx.font = "13px Roboto";
       this.ctx.fillText(this.people[i].FirstName + " " + this.people[i].LastName, 
       box.x + 5, box.y + 18);
     }

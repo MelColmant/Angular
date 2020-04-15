@@ -1,0 +1,21 @@
+<div *ngIf="isLoaded">
+    <div class="dropdown">
+        <button class="dropbtn">Add a person</button>
+    </div>
+    <div class="dropdown">
+        <button class="dropbtn">Update a person</button>
+            <div class="dropdown-content">
+                <li *ngFor="let person of people">
+                    {{person.FirstName}} {{person.LastName}}
+                </li>
+            </div>
+    </div>
+    <div class="dropdown">
+        <button class="dropbtn">Remove a person</button>
+            <div class="dropdown-content">
+                <li *ngFor="let person of people">
+                    {{person.FirstName}} {{person.LastName}}
+                </li>
+            </div>
+    </div>
+</div>
