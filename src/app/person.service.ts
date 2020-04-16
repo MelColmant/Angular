@@ -25,9 +25,21 @@ export class PersonService {
     return this.http.get<Person[]>(url)
   }
 
+  getPerson(id: number): Observable<Person> {
+    const personId = id;
+    const url = `${this.personUrl}/${personId}`;
+    return this.http.get<Person>(url)
+  }
+
   addPerson(person: Person): Observable<number> {
     const url = `${this.personUrl}WithId`;
     return this.http.post<number>(url, person, this.httpOptions)
+  }
+
+  updatePerson(person: Person): Observable<any> {
+    const personId = person.PersonId;
+    const url = `${this.personUrl}/${personId}`;
+    return this.http.put<any>(url, person, this.httpOptions)
   }
 
   getParents(personId: number): Observable<Person[]> {

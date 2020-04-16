@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { Router } from '@angular/router'
 
 import { Tree } from '../tree';
 import { TreeService } from '../tree.service';
@@ -32,6 +33,8 @@ export class TreeComponent implements OnInit {
   // passing it through the canvas element in the html
   isLoaded: boolean;
   // items needed when adding a new person via form
+  addStartVal: boolean;
+  relStartVal: boolean;
   radioData: string;
   selectedPerson: Person;
   selectedPerson1: Person;
@@ -46,15 +49,15 @@ export class TreeComponent implements OnInit {
   // to reload the child component (canvas) on new input
   eventsSubject: Subject<void> = new Subject<void>();
   
-
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private treeService: TreeService,
     private personService: PersonService,
     private parentchildService: ParentchildService,
     private relationshipService: RelationshipService,
   ) { }
-
+  // loading start here
   ngOnInit(): void {
     this.isLoaded = false;
     this.route.paramMap.subscribe(params => {
@@ -69,6 +72,27 @@ export class TreeComponent implements OnInit {
         this.tree = tree;
         this.getAllFromTree();
       });
+  }
+
+  getAllFromTree(){
+    let TreeId = this.treeId;
+    this.personService.getPersonsByTree(TreeId)
+      .subscribe(people => {
+        this.people = people;
+        this.listRel = [];
+        this.listRel.push({rel: 'Parent', gen: 1}, {rel: 'Partner', gen: 0, code: 'p'},
+        {rel: 'Fiancé', gen: 0, code: 'f'}, {rel: 'Spouse', gen: 0, code: 'm'}, 
+        {rel: 'Sibling', gen: 0}, {rel: 'Child', gen: -1});
+        this.addStartVal = false;
+        this.relStartVal = false;
+        this.isLoaded = true;
+      });
+  }
+  // loading finishes here
+
+  // adding a person logic start here
+  addStart(){
+    this.addStartVal = !this.addStartVal;
   }
 
   addPerson(FirstName : string, LastName: string, Gender: string,
@@ -134,19 +158,6 @@ export class TreeComponent implements OnInit {
       });
   }
 
-  getAllFromTree(){
-    let TreeId = this.treeId;
-    this.personService.getPersonsByTree(TreeId)
-      .subscribe(people => {
-        this.people = people;
-        this.listRel = [];
-        this.listRel.push({rel: 'Parent', gen: 1}, {rel: 'Partner', gen: 0, code: 'p'},
-        {rel: 'Fiancé', gen: 0, code: 'f'}, {rel: 'Spouse', gen: 0, code: 'm'}, 
-        {rel: 'Sibling', gen: 0}, {rel: 'Child', gen: -1});
-        this.isLoaded = true;
-      });
-  }
-
   getParents(personId: number){
     this.personService.getParents(personId)
       .subscribe(parents => {
@@ -159,6 +170,12 @@ export class TreeComponent implements OnInit {
           this.addParentChild(this.parents[i].PersonId, this.newPersonId, false);
         }
       })
+  }
+  // adding a person logic end here
+
+  // adding a relationshiop logic start here
+  relStart(){
+    this.relStartVal = !this.relStartVal;
   }
 
   getParents2(person1Id: number, person2Id: number){
@@ -192,28 +209,14 @@ export class TreeComponent implements OnInit {
     this.startDate = startDate;
     this.endDate = endDate;
   }
+  // adding a relationshiop logic end here
+
+  // updating a person logic start here
+  update(person: Person){
+    this.router.navigate(['/tree/'+ this.treeId + '/person/'+ person.PersonId]);
+  }
 
   reloadChild() {
     this.eventsSubject.next();
-  }
-
-  onSelect(person : Person){
-    this.selectedPerson = person;
-  }
-
-  onSelectP1(person : Person){
-    this.selectedPerson1 = person;
-  }
-
-  onSelectP2(person : Person){
-    this.selectedPerson2 = person;
-  }
-
-  onSelectRel(relation : object) {
-    this.selectedRel = relation;
-  }
-
-  onSelectRel2(relation : object) {
-    this.selectedRel2 = relation;
   }
 }

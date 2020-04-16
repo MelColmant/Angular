@@ -10,7 +10,7 @@ import { LogInComponent } from './log-in/log-in.component';
 import { TreeChoiceComponent } from './tree-choice/tree-choice.component';
 import { TreeComponent } from './tree/tree.component';
 import { CanvasComponent } from './canvas/canvas.component';
-import { DeletePersonComponent } from './delete-person/delete-person.component';
+import { UpdateComponent } from './update/update.component';
 
 @NgModule({
   declarations: [
@@ -20,7 +20,7 @@ import { DeletePersonComponent } from './delete-person/delete-person.component';
     TreeChoiceComponent,
     TreeComponent,
     CanvasComponent,
-    DeletePersonComponent
+    UpdateComponent,
   ],
 
   imports: [

@@ -1,3 +1,50 @@
+#container{
+    width: 100%;
+}
+
+#topleft {
+    width: auto;
+    float: left;
+    margin-right: 50px;
+}
+
+#left {
+    width: auto;
+    float: left;
+    border: 3px lavender solid;
+    padding: 10px;
+}
+
+#topright {
+    width: auto;
+    float: left;
+    margin-left: 50px;
+}
+
+#right {
+    width: auto;
+    float: left;
+    border: 3px cornsilk solid;
+    padding: 10px;
+}
+
+button {
+    background-color: white;
+    border: 1px lavender solid;
+    border-radius: 4px;
+    color: black;
+    text-align: center;
+    display: inline-block;
+    font-size: 16px;
+    padding: 4px 6px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: lavender;
+    color: black;
+}
+
 /* Style The Dropdown Button */
 .dropbtn {
     background-color: lavender;
@@ -44,7 +91,5 @@
   /* Change the background color of the dropdown button when the dropdown content is shown */
   .dropdown:hover .dropbtn {
     background-color: cornsilk;
+    color: black;
   }
-
-
-
