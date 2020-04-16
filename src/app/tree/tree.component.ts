@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Router } from '@angular/router'
+import { Router } from '@angular/router';
+
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmationDialogComponent } from '../shared/confirmation-dialog/confirmation-dialog.component'
 
 import { Tree } from '../tree';
 import { TreeService } from '../tree.service';
@@ -56,6 +59,7 @@ export class TreeComponent implements OnInit {
     private personService: PersonService,
     private parentchildService: ParentchildService,
     private relationshipService: RelationshipService,
+    public dialog: MatDialog,
   ) { }
   // loading start here
   ngOnInit(): void {
@@ -215,6 +219,22 @@ export class TreeComponent implements OnInit {
   update(person: Person){
     this.router.navigate(['/tree/'+ this.treeId + '/person/'+ person.PersonId]);
   }
+  // updating a person logic end here
+
+  // removing a person logic start here
+  openDialog(): void {
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '350px',
+      data: 'Are you sure you want to delete this person?'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if(result) {
+        console.log('Yes clicked');
+      }
+    });
+  }
+  // removing a person logic end here
 
   reloadChild() {
     this.eventsSubject.next();
