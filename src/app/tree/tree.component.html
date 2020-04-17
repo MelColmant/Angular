@@ -1,27 +1,37 @@
-
-    
 <div *ngIf="isLoaded">
-    <!-- start of the top menu -->
-    <div class="dropdown">
-        <button class="dropbtn" (click)="addStart()">Add a person</button>
-    </div>
-    <div class="dropdown">
-        <button class="dropbtn" (click)="relStart()">Add a relationship</button>
-    </div>
-    <div class="dropdown">
-        <button class="dropbtn">Update a person</button>
-        <div class="dropdown-content">
-            <li *ngFor="let person of people" (click)="update(person)">
-                {{person.FirstName}} {{person.LastName}}
-            </li>
+    <div *ngIf="isOwner && !isEmpty">
+        <!-- start of the top menu -->
+        <div class="dropdown">
+            <button class="dropbtn" (click)="addStart()">Add a person</button>
+        </div>
+
+        <div class="dropdown">
+            <button class="dropbtn" (click)="relStart()">Add a relationship</button>
+        </div>
+
+        <div class="dropdown">
+            <button class="dropbtn">Update a person</button>
+            <div class="dropdown-content">
+                <li *ngFor="let person of people" (click)="update(person)">
+                    {{person.FirstName}} {{person.LastName}}
+                </li>
+            </div>
+        </div>
+
+        <div class="dropdown">
+            <button class="dropbtn">Remove a person</button>
+            <div class="dropdown-content">
+                <li *ngFor="let person of people" (click)="openDialog(person)">
+                    {{person.FirstName}} {{person.LastName}}
+                </li>
+            </div>
         </div>
     </div>
-    <div class="dropdown">
-        <button class="dropbtn">Remove a person</button>
-        <div class="dropdown-content">
-            <li *ngFor="let person of people" (click)="openDialog()">
-                {{person.FirstName}} {{person.LastName}}
-            </li>
+
+    <div *ngIf="isOwner && isEmpty">
+        <!-- start of the top menu -->
+        <div class="dropdown">
+            <button class="dropbtn" (click)="addStart2()">Add your first person</button>
         </div>
     </div>
     <!-- end of the top menu -->
@@ -37,12 +47,62 @@
 
     <!-- adding a person start here -->
     <div id="container">
+        <div *ngIf="addStartVal2">
+            <h2>Add your first person</h2>
+               <div> <label>First name:
+                    <input [(ngModel)]="firstname" #firstName required/>
+                </label>
+            </div>
+            <br/>
+            <div>
+                <label>Last name:
+                    <input [(ngModel)]="lastname" #lastName required/>
+                </label>
+            </div>
+
+            <p>Gender:</p>
+            <div>
+                <input type="radio" name="rights" [(ngModel)]="radioData" 
+                        value="m" #male checked> 
+                <label for="male">Male</label>
+            </div>
+            <div>
+                <input type="radio" name="rights" [(ngModel)]="radioData" 
+                        value="f" #female> 
+                <label for="female">Female</label>
+            </div>
+            <br/>
+            <div>
+                <label>Birth date:
+                    <input type="date" #birthDate required/>
+                </label>
+            </div>
+            <br/>
+            <div>
+                <label>Death date:
+                    <input type="date" #deathDate/>
+                </label>
+            </div>
+            <br/>
+            <!-- "startDate.value.length != 0" checks if it has a value. 
+                                If so, call storeDates--> 
+                                <button (click)="addPerson2(firstName.value, lastName.value, this.radioData, 
+                                birthDate.value, 0, deathDate.value) ; addStart2()">
+                Add {{ firstname }} {{ lastname }} to your tree
+                </button>  
+
+        </div>
+
+
+
+
         <div *ngIf="addStartVal">
             
                 <h2>Add a person</h2>
                 <h3>Who is this person related to?</h3>
                 <div class="custom-select">
                         <select type="Person" [(ngModel)]="selectedPerson">
+                            <option [ngValue]="defaultChoice" disabled>Choose a person:</option>
                             <option *ngFor="let person of people" [ngValue]="person">
                                 {{person.FirstName}} {{person.LastName}}
                             </option>
@@ -51,6 +111,7 @@
                     <div *ngIf="selectedPerson">
                         <h3>What is the relationship between them?</h3>
                             <select [(ngModel)]="selectedRel">
+                                <option [ngValue]="defaultChoice" disabled>Choose a relation:</option>
                                 <option *ngFor="let relation of listRel" [ngValue]="relation">
                                     {{ relation.rel }}
                                 </option>
@@ -119,7 +180,7 @@
                             <button (click)="addPerson(firstName.value, lastName.value, this.radioData, 
                                             birthDate.value, selectedPerson.Generation + selectedRel.gen, 
                                             deathDate.value) ; startDate.value.length != 0 && 
-                                            storeDates(startDate.value, endDate.value)">
+                                            storeDates(startDate.value, endDate.value) ; addStart()">
                             Add {{ firstname }} {{ lastname }} to your tree
                             </button>  
                     </div>
@@ -128,13 +189,14 @@
         </div>
         <!-- adding a person ends here -->
 
-
+        <!-- adding a relationshiop starts here -->
             <div *ngIf="relStartVal">
             <h2>Add a relationship</h2>
             <div>
                     <h3>Between: </h3>
                     <div class="custom-select">
                         <select type="Person" [(ngModel)]="selectedPerson1">
+                            <option [ngValue]="defaultChoice" disabled>Select a person:</option>
                             <option *ngFor="let person of people" [ngValue]="person">
                                 {{person.FirstName}} {{person.LastName}}
                             </option>
@@ -145,6 +207,7 @@
                     <h3>And: </h3>
                     <div class="custom-select">
                         <select type="Person" [(ngModel)]="selectedPerson2">
+                            <option [ngValue]="defaultChoice" disabled>Select a person:</option>
                             <option *ngFor="let person of people" [ngValue]="person">
                                 {{person.FirstName}} {{person.LastName}}
                             </option>
@@ -158,6 +221,7 @@
                     <h3>What is the relationship between them?</h3>
                     <div class="custom-select">
                         <select [(ngModel)]="selectedRel2">
+                            <option [ngValue]="defaultChoice" disabled>Choose a relation:</option>
                             <option *ngFor="let relation of listRel" [ngValue]="relation">
                                 {{relation.rel}} 
                             </option>
@@ -172,21 +236,21 @@
 
                         <div *ngIf="selectedRel2.rel == 'Parent'">
                             <button (click)="addParentChild(selectedPerson2.PersonId,
-                                            selectedPerson1.PersonId, false)">
+                                            selectedPerson1.PersonId, false) ; relStart()">
                                 Add relationship to your tree
                             </button> 
                         </div>
 
                         <div *ngIf="selectedRel2.rel == 'Child'">
                             <button (click)="addParentChild(selectedPerson1.PersonId,
-                                            selectedPerson2.PersonId, false)">
+                                            selectedPerson2.PersonId, false) ; relStart()">
                                 Add relationship to your tree
                             </button> 
                         </div>
 
                         <div *ngIf="selectedRel2.rel == 'Sibling'">
                             <button (click)="getParents2(selectedPerson1.PersonId,
-                                            selectedPerson2.PersonId)">
+                                            selectedPerson2.PersonId) ; relStart()">
                                 Add relationship to your tree
                             </button> 
                         </div>
@@ -210,7 +274,7 @@
                                 <div *ngIf="selectedPerson1.Gender == 'm'">
                                 <button (click)="addRelationship(selectedPerson1.PersonId,
                                             selectedPerson2.PersonId, startDate.value, false,
-                                            selectedRel2.code, endDate.value)">
+                                            selectedRel2.code, endDate.value) ; relStart()">
                                     Add relationship to your tree
                                 </button> 
                                 </div>
@@ -218,7 +282,7 @@
                                 <div *ngIf="selectedPerson1.Gender == 'f'">
                                     <button (click)="addRelationship(selectedPerson2.PersonId,
                                                 selectedPerson1.PersonId, startDate.value, false,
-                                                selectedRel2.code, endDate.value)">
+                                                selectedRel2.code, endDate.value) ; relStart()">
                                         Add relationship to your tree
                                     </button> 
                                     </div>
@@ -232,9 +296,7 @@
                 
             </div>
         
-        </div>
-
-        
+        </div>  
 
     </div>
     

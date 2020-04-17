@@ -28,4 +28,10 @@ export class ParentchildService {
   addParentChild(parentchild: ParentChild): Observable<number> {
     return this.http.post<number>(this.parentchildUrl, parentchild, this.httpOptions)
   }
+
+  deleteParentChildId(id: number): Observable<any> {
+    const personId = id;
+    const url = `${this.parentchildUrl}Id/${personId}`;
+    return this.http.delete<any>(url, this.httpOptions)
+  }
 }

@@ -22,11 +22,6 @@ export class SignInComponent implements OnInit {
     this.radioData = false;
   }
 
-  delete(id: number): void {
-    this.userService.deleteUser(id)
-    .subscribe();
-  }
-
   add(UserName : string, Password : string, IsAdmin : boolean){
     this.userService.addUser({ UserName, Password, IsAdmin } as User )
       .subscribe(res => {
@@ -39,6 +34,10 @@ export class SignInComponent implements OnInit {
           this.router.navigate(['/login'])
         }
       });
+  }
+
+  loginPage(){
+    this.router.navigate(['/login']);
   }
 
 }

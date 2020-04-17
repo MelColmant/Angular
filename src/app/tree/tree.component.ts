@@ -35,13 +35,19 @@ export class TreeComponent implements OnInit {
   // need to wait for the tree object to be filled before
   // passing it through the canvas element in the html
   isLoaded: boolean;
+  // is the current user owning the tree?
+  isOwner: boolean;
+  // is the tree empty at the moment?
+  isEmpty: boolean;
   // items needed when adding a new person via form
   addStartVal: boolean;
   relStartVal: boolean;
+  addStartVal2: boolean;
   radioData: string;
   selectedPerson: Person;
   selectedPerson1: Person;
   selectedPerson2: Person;
+  defaultChoice: string;
   listRel: Array<object>;
   selectedRel: any;
   selectedRel2: any;
@@ -89,15 +95,38 @@ export class TreeComponent implements OnInit {
         {rel: 'Sibling', gen: 0}, {rel: 'Child', gen: -1});
         this.addStartVal = false;
         this.relStartVal = false;
+        this.addStartVal2 = false;
+        if(this.tree.UserId == +localStorage.getItem("UserId")){
+          this.isOwner = true;
+        }else this.isOwner = false;
+        if(this.people.length == 0){
+          this.isEmpty = true;
+        }else this.isEmpty = false;
         this.isLoaded = true;
       });
   }
   // loading finishes here
 
   // adding a person logic start here
+  addStart2(){
+    this.addStartVal2 = !this.addStartVal2;
+  }
+
   addStart(){
     this.addStartVal = !this.addStartVal;
   }
+
+  addPerson2(FirstName : string, LastName: string, Gender: string,
+    BirthDate: Date, Generation: number, DeathDate?: Date){
+    let TreeId = this.treeId;
+    this.personService.addPerson({ FirstName, LastName, Gender,
+                                    BirthDate, DeathDate, TreeId, Generation } as Person)
+      .subscribe(personId =>{
+        this.isEmpty = false;
+        this.reloadChild();
+      });
+  }
+
 
   addPerson(FirstName : string, LastName: string, Gender: string,
             BirthDate: Date, Generation: number, DeathDate?: Date){
@@ -222,17 +251,39 @@ export class TreeComponent implements OnInit {
   // updating a person logic end here
 
   // removing a person logic start here
-  openDialog(): void {
+  openDialog(person: Person): void {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-      width: '350px',
-      data: 'Are you sure you want to delete this person?'
+      width: '400px',
+      data: `Are you sure you want to delete ${person.FirstName} ${person.LastName}
+              and all of its relationships?`
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if(result) {
-        console.log('Yes clicked');
+        this.deleteRelationship(person.PersonId);
       }
     });
+  }
+
+  deleteRelationship(id: number){
+    this.relationshipService.deleteRelationshipId(id)
+      .subscribe(() => {
+        this.deleteParentChild(id);
+      });
+  }
+
+  deleteParentChild(id: number){
+    this.parentchildService.deleteParentChildId(id)
+      .subscribe(() => {
+        this.deletePerson(id);
+      });
+  }
+
+  deletePerson(id: number){
+    this.personService.deletePerson(id)
+      .subscribe(() => {
+        this.reloadChild();
+      });
   }
   // removing a person logic end here
 

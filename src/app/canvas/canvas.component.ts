@@ -1,4 +1,5 @@
 import { Component, OnInit, Input, ViewChild, ElementRef } from '@angular/core';
+import { Router } from '@angular/router';
 
 import { Person } from '../person';
 import { PersonService } from '../person.service';
@@ -55,7 +56,8 @@ export class CanvasComponent implements OnInit {
   constructor(
     private personService: PersonService,
     private relationshipService: RelationshipService,
-    private parentchildService: ParentchildService
+    private parentchildService: ParentchildService,
+    private router: Router,
   ) { }
 
   ngOnInit() : void {
@@ -324,12 +326,24 @@ export class CanvasComponent implements OnInit {
     return false;
   }
 
+  hitBox(x, y) {
+    for (var i = 0; i < this.boxes.length; i ++) {
+      var box = this.boxes[i];
+      if (x >= box.x && x <= box.x + box.w && y >= box.y && y <= box.y + box.h) {
+        return box.personId;
+      }
+    }
+    return null;
+  }
+
   handleMouseClick(e) {
     this.startX = +e.clientX - this.offsetX;
     this.startY = +e.clientY - this.offsetY;
-    if (this.hit(this.startX, this.startY)){
-      console.log("clicked");
-    }  
+    var PersonId = this.hitBox(this.startX, this.startY);
+    // make sure to navigate only when clicking on box and if it is the owner of the tree
+    if (PersonId != null && this.tree.UserId == +localStorage.getItem("UserId")){
+      this.router.navigate(['/tree/'+ this.tree.TreeId + '/person/'+ PersonId]);
+    } 
   }
 
   handleMouseDown(e) {
@@ -339,8 +353,6 @@ export class CanvasComponent implements OnInit {
     this.offsetY = this.canvas.nativeElement.getBoundingClientRect().top;
     this.startX = +e.clientX - this.offsetX;
     this.startY = +e.clientY - this.offsetY;
-    console.log("startX: " + this.startX);
-    console.log("startY: " + this.startY);
     this.isDown = this.hit(this.startX, this.startY);
   }
 

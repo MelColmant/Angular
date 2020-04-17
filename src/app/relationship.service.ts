@@ -28,4 +28,10 @@ export class RelationshipService {
   addRelationship(relationship: Relationship): Observable<number> {
     return this.http.post<number>(this.relationshipUrl, relationship, this.httpOptions)
   }
+
+  deleteRelationshipId(id: number): Observable<any> {
+    const personId = id;
+    const url = `${this.relationshipUrl}s/${personId}`;
+    return this.http.delete<any>(url, this.httpOptions)
+  }
 }

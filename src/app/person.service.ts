@@ -36,6 +36,12 @@ export class PersonService {
     return this.http.post<number>(url, person, this.httpOptions)
   }
 
+  deletePerson(id: number): Observable<any> {
+    const personId = id;
+    const url = `${this.personUrl}/${personId}`;
+    return this.http.delete<any>(url, this.httpOptions)
+  }
+
   updatePerson(person: Person): Observable<any> {
     const personId = person.PersonId;
     const url = `${this.personUrl}/${personId}`;

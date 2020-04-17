@@ -49,7 +49,17 @@ export class UpdateComponent implements OnInit {
   }
 
   update(){
-    this.personService.updatePerson(this.person)
+    var PersonId = this.person.PersonId
+    var FirstName = this.person.FirstName;
+    var LastName = this.person.LastName;
+    var Gender = this.person.Gender;
+    var BirthDate = this.birthDate;
+    var DeathDate = this.deathDate;
+    var TreeId = this.person.TreeId;
+    var Generation = this.person.Generation;
+
+    this.personService.updatePerson({ PersonId, FirstName, LastName, Gender,
+      BirthDate, DeathDate, TreeId, Generation } as Person)
       .subscribe(() => this.backToTree());
   }
 

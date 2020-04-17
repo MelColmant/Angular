@@ -1,26 +1,44 @@
-<h2>Log In</h2>
+<div id="top">
+    <h2>FamilyTree Software Login</h2>
+</div>
 
-    <diV>
-    <label>Username:
-        <input #userName required/>
-    </label>
-    </diV>
+<div id="container1">
+    <div>
+        <label>Username:
+            <input #userName required/>
+        </label>
+    </div>
     <br/>
     <div>
-    <label>Password:
-        <input type="password" #password required/>
-    </label>
+        <label>Password:
+            <input type="password" #password required/>
+        </label>
     </div>
 
     <br/>
+    <div style="text-align:center;">
     <button (click)="check(userName.value, password.value) ; check2(userName.value, password.value) ">
         Log In
     </button>
+    </div>
     <br/>
     <div *ngIf="!isRegistered">
-        <p>Your username/password isn't valid</p>
-        <h2>Not registered yet?</h2>
-        <nav>
-            <a routerLink="">Register Here</a>
-        </nav>
+        <p>Your username/password isn't valid.</p>
     </div>
+</div>
+
+<div id="bottom">
+    <div *ngIf="!isRegistered">
+        <h2>Not registered yet?</h2>
+    </div>
+</div>
+
+<div id="container2">
+    <div *ngIf="!isRegistered">
+        <div style="text-align:center;">
+            <button (click)="signInPage()">
+                Register Here
+            </button>
+        </div>
+    </div>  
+</div>

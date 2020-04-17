@@ -51,6 +51,10 @@ export class LogInComponent implements OnInit {
       });
 
   }
+
+  signInPage(){
+    this.router.navigate(['/']);
+  }
   
 }
 
