@@ -177,6 +177,7 @@ export class TreeComponent implements OnInit {
     this.parentchildService.addParentChild({ Person1Id, Person2Id, IsAdopted,
                                           TreeId } as ParentChild)
       .subscribe(data =>{
+      this.reloadPeople();
       this.reloadChild();
       });
   }
@@ -187,6 +188,7 @@ export class TreeComponent implements OnInit {
     this.relationshipService.addRelationship({ Person1Id, Person2Id, StartDate, EndDate,
                                           IsUnisex, RelationshipTypeCode, TreeId } as Relationship)
       .subscribe(data =>{
+      this.reloadPeople();
       this.reloadChild();
       });
   }
@@ -282,11 +284,22 @@ export class TreeComponent implements OnInit {
   deletePerson(id: number){
     this.personService.deletePerson(id)
       .subscribe(() => {
+        this.reloadPeople();
         this.reloadChild();
       });
   }
   // removing a person logic end here
 
+  //reload the people array after a change
+  reloadPeople() {
+    let TreeId = this.treeId;
+    this.personService.getPersonsByTree(TreeId)
+      .subscribe(people => {
+        this.people = people;
+      });
+  }
+
+  // reload the canvas after a change
   reloadChild() {
     this.eventsSubject.next();
   }

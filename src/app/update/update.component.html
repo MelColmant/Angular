@@ -1,79 +1,80 @@
 
-<div class="dropdown">
-    <button class="dropbtn" (click)="backToTree()">Back to tree</button>
-</div>
-<div *ngIf="isLoaded">
-    <div id="container">
-        <div id="topleft">
-            <h2>Update a person</h2>
-            <div id="left">
-                <div>
-                    <label>First name:
-                        <input [(ngModel)]="person.FirstName"/>
-                    </label>
-                </div>
-                <br/>
+<div id="container">
+    <div class="dropdown">
+        <button class="dropbtn" (click)="backToTree()">Back to tree</button>
+    </div>
 
-                <div>
-                    <label>Last name:
-                        <input [(ngModel)]="person.LastName"/>
-                    </label>
-                </div>
+    <div *ngIf="isLoaded">
+        <div id="containerX">
+            <div>
+                <h2>Update a person</h2>
+                    <div id="container1">
+                        <div>
+                            <label>First name:
+                                <input [(ngModel)]="person.FirstName"/>
+                            </label>
+                        </div>
+                        <br/>
+
+                        <div>
+                            <label>Last name:
+                                <input [(ngModel)]="person.LastName"/>
+                            </label>
+                        </div>
     
-            <p>Gender:</p>
-                <div>
-                    <input type="radio" name="rights" [(ngModel)]="person.Gender" 
-                            value="m" #male> 
-                        <label for="male">Male</label>
-                </div>
-                <div>
-                    <input type="radio" name="rights" [(ngModel)]="person.Gender" 
-                            value="f" #female> 
-                        <label for="female">Female</label>
-                </div>
-                <br/>
-
-                <div>
-                    <label>Birth date:
-                        <input type="date" [ngModel]="person.BirthDate | date: 'yyyy-MM-dd'" 
-                            (ngModelChange)="birthDate = $event"/>
-                    </label>
-                </div>
-                <br/>
-
-                <div>
-                    <label>Death date:
-                        <input type="date" [ngModel]="person.DeathDate | date: 'yyyy-MM-dd'"
-                            (ngModelChange)="deathDate = $event"/>
-                    </label>
-                </div>
+                        <p>Gender:</p>
+                        <div>
+                            <input type="radio" name="rights" [(ngModel)]="person.Gender" 
+                                    value="m" #male> 
+                            <label for="male">Male</label>
+                        </div>
+                        <div>
+                            <input type="radio" name="rights" [(ngModel)]="person.Gender" 
+                                    value="f" #female> 
+                            <label for="female">Female</label>
+                        </div>
+                        <br/>
+                        <div>
+                            <label>Birth date:
+                                <input type="date" [ngModel]="person.BirthDate | date: 'yyyy-MM-dd'" 
+                                        (ngModelChange)="birthDate = $event"/>
+                            </label>
+                        </div>
+                        <br/>
+                        <div>
+                            <label>Death date:
+                                <input type="date" #deathDateH [ngModel]="person.DeathDate | date: 'yyyy-MM-dd'"
+                                        (ngModelChange)="deathDate = $event"/>
+                            </label>
+                        </div>
+                    </div>
+            </div>
+        
+            <div>
+                <h2>Review changes & Update</h2>
+                    <div id="container2">
+                        <p>Updated first name: <em>{{ person.FirstName}}</em></p>
+                        <p>Updated last name: <em>{{ person.LastName}}</em></p>
+                        <div *ngIf="person.Gender == 'm'">
+                            <p>Updated gender: <em>Male</em></p>
+                        </div>
+                        <div *ngIf="person.Gender == 'f'">
+                            <p>Updated gender: <em>Female</em></p>
+                        </div>
+                            <p>Updated birth date: <em>{{birthDate | date: 'dd-MM-yyyy'}}</em></p>
+                        <div *ngIf="deathDate == null || deathDateH.value.length == 0">
+                            <p><em>Alive</em></p>
+                        </div>
+                        <div *ngIf="deathDate != null && deathDateH.value.length != 0">
+                            <p>Updated death date: <em>{{deathDate | date: 'dd-MM-yyyy'}}</em></p>
+                        </div>
+                        <div style="text-align:center;">
+                            <button (click)="update()">
+                                Update {{ person.FirstName }} {{ person.LastName }}
+                            </button>
+                        </div>
+                    </div>  
+            </div>
         </div>
     </div>
-        <div id=topright>
-            <h2>Review changes</h2>
-            <div id=right>
-            <p>Updated First name: {{ person.FirstName}}</p>
-            <p>Updated Last name: {{ person.LastName}}</p>
-            <div *ngIf="person.Gender == 'm'">
-            <p>Updated Gender: Male</p>
-            </div>
-            <div *ngIf="person.Gender == 'f'">
-            <p>Updated Gender: Female</p>
-            </div>
-            <p>Updated BirthDate: {{birthDate | date: 'dd-MM-yyyy'}}</p>
-            <div *ngIf="deathDate == null">
-            <p>Alive</p>
-            </div>
-            <div *ngIf="deathDate != null">
-            <p>Updated DeathDate: {{deathDate | date: 'dd-MM-yyyy'}}</p>
-            </div>
-            <div style="text-align:center;">
-            <button (click)="update()">
-                    Update {{ person.FirstName }} {{ person.LastName }}
-            </button>
-            </div>
-        </div>  
-    </div>
-    </div>
 </div>
-

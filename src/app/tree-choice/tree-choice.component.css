@@ -1,46 +1,34 @@
-li {
-    cursor: pointer;
-    margin-bottom: 10px;
-}
-
-li:hover {
-    background-color: lightsteelblue;
-}
-
-.list {
-    margin: 0 0 2px 0;
-    list-style-type: none;
-    border: 1px solid black;
-    padding: 5px;
-    display: inline-block;
-}
-
 .custom-select select{
     background-color: cornsilk;
     width: auto;
     padding: 5px;
   }
 
+#container {
+    display: flex;
+    flex-direction: column;
+    
+ }
+
+ #top {
+    text-align: center;
+}
+
+ #containerX {
+    display: flex;
+    justify-content: space-evenly;
+ }
+
 #container1 {
     width: auto;
-    float: left;
     border: 3px cornsilk solid;
     padding: 10px;
-    margin-right: 50px;
 }
 
 #container2 {
     width: auto;
-    float: left;
     border: 3px lavender solid;
     padding: 10px;
-    margin-left: 50px;
-}
-
-#top {
-    width: 100%;
-    float: left;
-    text-align: center;
 }
 
 button {
@@ -49,7 +37,6 @@ button {
     border-radius: 4px;
     color: black;
     text-align: center;
-    display: inline-block;
     font-size: 16px;
     padding: 4px 6px;
     cursor: pointer;

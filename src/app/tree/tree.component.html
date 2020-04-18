@@ -1,52 +1,52 @@
-<div *ngIf="isLoaded">
-    <div *ngIf="isOwner && !isEmpty">
-        <!-- start of the top menu -->
-        <div class="dropdown">
-            <button class="dropbtn" (click)="addStart()">Add a person</button>
-        </div>
+<div id="container">
+    <div *ngIf="isLoaded">
+        <div *ngIf="isOwner && !isEmpty">
+            <!-- start of the top menu -->
+            <div class="dropdown">
+                <button class="dropbtn" (click)="addStart()">Add a person</button>
+            </div>
 
-        <div class="dropdown">
-            <button class="dropbtn" (click)="relStart()">Add a relationship</button>
-        </div>
+            <div class="dropdown">
+                <button class="dropbtn" (click)="relStart()">Add a relationship</button>
+            </div>
 
-        <div class="dropdown">
-            <button class="dropbtn">Update a person</button>
-            <div class="dropdown-content">
-                <li *ngFor="let person of people" (click)="update(person)">
-                    {{person.FirstName}} {{person.LastName}}
-                </li>
+            <div class="dropdown">
+                <button class="dropbtn">Update a person</button>
+                <div class="dropdown-content">
+                    <li *ngFor="let person of people" (click)="update(person)">
+                        {{person.FirstName}} {{person.LastName}}
+                    </li>
+                </div>
+            </div>
+
+            <div class="dropdown">
+                <button class="dropbtn">Remove a person</button>
+                <div class="dropdown-content">
+                    <li *ngFor="let person of people" (click)="openDialog(person)">
+                        {{person.FirstName}} {{person.LastName}}
+                    </li>
+                </div>
             </div>
         </div>
 
-        <div class="dropdown">
-            <button class="dropbtn">Remove a person</button>
-            <div class="dropdown-content">
-                <li *ngFor="let person of people" (click)="openDialog(person)">
-                    {{person.FirstName}} {{person.LastName}}
-                </li>
+        <div *ngIf="isOwner && isEmpty">
+            <!-- top menu if the tree is still empty -->
+            <div class="dropdown">
+                <button class="dropbtn" (click)="addStart2()">Add your first person</button>
             </div>
         </div>
-    </div>
+        <!-- end of the top menu -->
 
-    <div *ngIf="isOwner && isEmpty">
-        <!-- start of the top menu -->
-        <div class="dropdown">
-            <button class="dropbtn" (click)="addStart2()">Add your first person</button>
-        </div>
-    </div>
-    <!-- end of the top menu -->
+        <!-- start of title -->
+        <h2>{{tree.TreeName}}</h2>
+        <p>{{tree.Description}}</p>
+        <!-- end of title -->
 
-    <!-- start of title -->
-    <h2>{{tree.TreeName}}</h2>
-    <p>{{tree.Description}}</p>
-    <!-- end of title -->
+        <!-- canvas integration -->
+        <app-canvas [tree]="tree" [events]="eventsSubject.asObservable()"></app-canvas>
+        <!-- end of canvas integration -->
 
-    <!-- canvas integration -->
-    <app-canvas [tree]="tree" [events]="eventsSubject.asObservable()"></app-canvas>
-    <!-- end of canvas integration -->
-
-    <!-- adding a person start here -->
-    <div id="container">
+        <!-- adding a person start here, if empty tree -->
         <div *ngIf="addStartVal2">
             <h2>Add your first person</h2>
                <div> <label>First name:
@@ -90,14 +90,12 @@
                                 birthDate.value, 0, deathDate.value) ; addStart2()">
                 Add {{ firstname }} {{ lastname }} to your tree
                 </button>  
-
-        </div>
-
-
-
-
-        <div *ngIf="addStartVal">
             
+        </div>
+        <!-- adding a person end here, if empty tree -->
+        <!-- adding a person start here -->
+        <div *ngIf="addStartVal">
+            <div>
                 <h2>Add a person</h2>
                 <h3>Who is this person related to?</h3>
                 <div class="custom-select">
@@ -107,7 +105,8 @@
                                 {{person.FirstName}} {{person.LastName}}
                             </option>
                         </select>
-
+            
+            
                     <div *ngIf="selectedPerson">
                         <h3>What is the relationship between them?</h3>
                             <select [(ngModel)]="selectedRel">
@@ -185,12 +184,12 @@
                             </button>  
                     </div>
                 
-            
+        </div> 
         </div>
         <!-- adding a person ends here -->
 
         <!-- adding a relationshiop starts here -->
-            <div *ngIf="relStartVal">
+        <div *ngIf="relStartVal">
             <h2>Add a relationship</h2>
             <div>
                     <h3>Between: </h3>
@@ -285,7 +284,7 @@
                                                 selectedRel2.code, endDate.value) ; relStart()">
                                         Add relationship to your tree
                                     </button> 
-                                    </div>
+                                </div>
 
                                 
                         </div>
@@ -299,5 +298,5 @@
         </div>  
 
     </div>
-    
+
 </div>

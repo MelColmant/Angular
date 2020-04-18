@@ -1,4 +1,10 @@
-/* Style The Dropdown Button */
+#container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+ }
+ 
+ /* Style The Dropdown Button */
 .dropbtn {
     background-color: lavender;
     color: black;
@@ -19,7 +25,7 @@
   .dropdown-content {
     display: none;
     position: absolute;
-    background-color: #f9f9f9;
+    background-color: cornsilk;
     min-width: 160px;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     z-index: 1;
@@ -34,7 +40,7 @@
   }
   
   /* Change color of dropdown links on hover */
-  .dropdown-content li:hover {background-color: #f1f1f1}
+  .dropdown-content li:hover {background-color: whitesmoke}
   
   /* Show the dropdown menu on hover */
   .dropdown:hover .dropdown-content {
@@ -47,25 +53,9 @@
     color: black;
   }
   
-  li {
+li {
     cursor: pointer;
     margin-bottom: 10px;
-}
-
-li:hover {
-    background-color: lightsteelblue;
-}
-
-.list {
-    margin: 0 0 2px 0;
-    list-style-type: none;
-    border: 1px solid black;
-    padding: 5px;
-    display: inline-block;
-}
-
-.list li.selected {
-    background-color: lightskyblue;
 }
 
 button {
@@ -74,7 +64,6 @@ button {
     border-radius: 4px;
     color: black;
     text-align: center;
-    display: inline-block;
     font-size: 16px;
     padding: 4px 6px;
     cursor: pointer;
@@ -83,44 +72,6 @@ button {
 button:hover {
     background-color: lavender;
     color: black;
-}
-
-#container {
-    width: 100%;
-}
-
-#left {
-    width: 50%;
-    float: left;
-}
-
-#left_left {
-    width: 24%;
-    float: left;
-}
-
-#left_right {
-    width: 24%;
-    float: left;
-}
-
-#right_left {
-    width: 25%;
-    float: left;
-}
-
-#right_right {
-    width: 25%;
-    float: left;
-}
-
-#right {
-    width: 50%;
-    float: left;
-}
-
-.clear {
-    clear: both;
 }
 
 .custom-select select{

@@ -1,57 +1,49 @@
-<div id="top">
+<div id="container">
     <h2>Sign In To FamilyTree Software</h2>
-</div>
-
-<div id="container1">
-    <div>   
-        <label>Username:
-            <input #userName required/>
-        </label>
-    </div>
-    <br/>
-    <div>
-        <label>Password:
-            <input type="password" #password required/>
-        </label>
-    </div>
-
-    <p>Select your rights:</p>
-
-    <div>
-        <input type="radio" name="rights" [(ngModel)]="radioData" [value]="true" #admin checked> 
-            <label for="admin">Admin</label>
-    </div>
-
-    <div>
-        <input type="radio" name="rights" [(ngModel)]="radioData" [value]="false" #viewer> 
-            <label for="viewer">Viewer</label>
-    </div>
-    <br/>
-    <div style="text-align:center;">
-        <button (click)="add(userName.value, password.value, this.radioData)">
-            Sign In
-        </button>
-    </div>
-
-    <div *ngIf="alreadyExist">
+    
+    <div id="container1">
+        <div>   
+            <label>Username:<br/>
+                <input #userName required/>
+            </label>
+        </div>
         <br/>
-            <p>This username is already taken. Please choose another one.</p>
+        <div>
+            <label>Password:<br/>
+                <input type="password" #password required/>
+            </label>
+        </div>
+
+        <p>Select your rights:</p>
+
+        <div>
+            <input type="radio" name="rights" [(ngModel)]="radioData" [value]="true" #admin checked> 
+                <label for="admin">Admin</label>
+        </div>
+
+        <div>
+            <input type="radio" name="rights" [(ngModel)]="radioData" [value]="false" #viewer> 
+                <label for="viewer">Viewer</label>
+        </div>
+        <br/>
+        <div style="text-align:center;">
+            <button (click)="add(userName.value, password.value, this.radioData)">
+                Sign In
+            </button>
+        </div>
+
+        <div id="alreadyExist" *ngIf="alreadyExist">
+            <br/>
+                <p>This username is already taken.<br/>
+                Please choose another one.</p>
+        </div>
     </div>
-    <br/>
-</div>
 
-<div id="bottom">
     <h2>Already registered?</h2>
-</div>
-
-<div id=container2>
-    <div style="text-align:center;">
         <button (click)="loginPage()">
             Login Here
-        </button>
-    </div>
+        </button>   
 </div>
-
     
 
 

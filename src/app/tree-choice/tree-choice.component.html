@@ -1,40 +1,45 @@
 <div *ngIf="isLoaded">
 
-<div id="top"><h2>Make Your Choice</h2></div>
-    <div *ngIf="isAdmin">
-        
-        
-            <div id="container1">
-                <h4>Create a new tree</h4>
-                <div>
-                <label>Tree name:
-                    <input #treeName required/>
-                </label>
-            </div>
-            <br/>
-            <div>
-                <label>Description:
-                    <input #description/>
-                </label>
-            </div>
-            <br/>
-            <div style="text-align:center;">
-                <button (click)="createTree(treeName.value, description.value)">
-                    Create Tree
-                </button>
-            </div>
-        </div>
-    </div>
+    <div id="container">
 
-    <div id="container2">
-        <h4>View a tree</h4>
-        <div class="custom-select">
-            <select [(ngModel)]="tree" (ngModelChange)="onSelect()">
-                <option [ngValue]="tree" disabled>Choose a tree:</option>
-                <option *ngFor="let tree of trees" [ngValue]="tree">
-                    {{tree.TreeName}} | {{tree.Description}}
-                </option>
-            </select>
+        <div id="top">
+            <h2>Make Your Choice</h2>
         </div>
+        
+        <div id="containerX">
+            <div id="container1" *ngIf="isAdmin">
+                <h4>Create a new tree</h4>
+                    <div>
+                        <label>Tree name:
+                            <input #treeName required/>
+                        </label>
+                    </div>
+                    <br/>
+                    <div>
+                        <label>Description:
+                            <input #description/>
+                        </label>
+                    </div>
+                    <br/>
+                    <div style="text-align:center;">
+                        <button (click)="createTree(treeName.value, description.value)">
+                            Create Tree
+                        </button>
+                    </div>
+            </div>
+        
+            <div id="container2">
+                <h4>View a tree</h4>
+                    <div class="custom-select">
+                        <select [(ngModel)]="tree" (ngModelChange)="onSelect()">
+                            <option [ngValue]="tree" disabled>Choose a tree:</option>
+                            <option *ngFor="let tree of trees" [ngValue]="tree">
+                                {{tree.TreeName}} | {{tree.Description}}
+                            </option>
+                        </select>
+                    </div>
+            </div>
+
+        </div> 
     </div>
 </div>
