@@ -46,7 +46,7 @@
         <app-canvas [tree]="tree" [events]="eventsSubject.asObservable()"></app-canvas>
         <!-- end of canvas integration -->
 
-        <!-- adding a person start here, if empty tree -->
+        <!-- adding the first person of an empty tree start here -->
         <div *ngIf="addStartVal2">
             <h2>Add your first person</h2>
                <div> <label>First name:
@@ -86,13 +86,13 @@
             <br/>
             <!-- "startDate.value.length != 0" checks if it has a value. 
                                 If so, call storeDates--> 
-                                <button (click)="addPerson2(firstName.value, lastName.value, this.radioData, 
+                                <button (click)="addFirstPerson(firstName.value, lastName.value, this.radioData, 
                                 birthDate.value, 0, deathDate.value) ; addStart2()">
                 Add {{ firstname }} {{ lastname }} to your tree
                 </button>  
             
         </div>
-        <!-- adding a person end here, if empty tree -->
+        <!-- adding the first person of an empty tree end here -->
         <!-- adding a person start here -->
         <div *ngIf="addStartVal">
             <div>

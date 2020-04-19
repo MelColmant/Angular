@@ -48,6 +48,11 @@ export class PersonService {
     return this.http.put<any>(url, person, this.httpOptions)
   }
 
+  updatePosition(personId: number, person: Person): Observable<any> {
+    const url = `${this.personUrl}Position/${personId}`;
+    return this.http.put<any>(url, person, this.httpOptions)
+  }
+
   getParents(personId: number): Observable<Person[]> {
     const url = `${this.personUrl}/Parents/${personId}`;
     return this.http.get<Person[]>(url)

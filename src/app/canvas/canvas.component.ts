@@ -52,6 +52,8 @@ export class CanvasComponent implements OnInit {
   spaceWidth: number;
   boxHeight: number;
   spaceHeight: number;
+  maxX: number;
+  maxY: number;
 
   constructor(
     private personService: PersonService,
@@ -90,9 +92,9 @@ export class CanvasComponent implements OnInit {
           this.isLoaded = false;
           return;
         }
-        //Set up canvas size based on generations, box height and space height (canvas height)
-        //as well as max people in generation, box width and space width (canvas width)
-        this.setCanvas(100, 20, 50, 20);
+        //Set up canvas size based on maxX, box height and space height (canvas height)
+        //as well as maxY, box width and space width (canvas width)
+        this.setCanvas(100, 20, 50, 20, this.getMaxX(), this.getMaxY());
         this.getAllRelFromTree(TreeId);
       });
   }
@@ -113,69 +115,40 @@ export class CanvasComponent implements OnInit {
         this.init();
       });
   }
-  //get the amount of generations in current tree
-  genAmount(){
-    var amount = 1;
-    var gen = this.people[0].Generation;
+  
+  //get the maximum box position in X
+  getMaxX() {
+    this.maxX = 0;
     for (var i = 0; i<this.people.length; i++){
-      if (this.people[i].Generation != gen){
-        amount += 1;
-        gen = this.people[i].Generation
-      } 
-    }
-    return amount;
-  }
-  //get the maximum amount of people in a generation for current tree
-  maxGen(){
-    var maxAmount = 0;
-    var amount = 0;
-    var gen= this.people[0].Generation;
-    for (var i = 0; i <this.people.length; i++){
-      if (this.people[i].Generation == gen){
-        amount += 1;
-        if(amount > maxAmount){
-          maxAmount = amount;
-        }
-      }else{
-        amount = 1;
-        gen = this.people[i].Generation;
+      if (this.people[i].PositionX > this.maxX){
+        this.maxX = this.people[i].PositionX;
       }
     }
-    return maxAmount;
+    return this.maxX;
   }
-  //set up the canvas dimension, based on genAmount & maxGen
-  setCanvas(boxWidth: number, spaceWidth: number, boxHeight: number, spaceHeight: number){
+  //get the maximum box position in Y
+  getMaxY() {
+    this.maxY = 0;
+    for (var i = 0; i<this.people.length; i++){
+      if (this.people[i].PositionY > this.maxY){
+        this.maxY = this.people[i].PositionY;
+      }
+    }
+    return this.maxY;
+  }
+
+  //set up the canvas dimension, based on getMaxX & getMaxY
+  setCanvas(boxWidth: number, spaceWidth: number, boxHeight: number, spaceHeight: number,
+            maxX: number, maxY: number){
     //initialize the global variables related to the canvas
     this.boxWidth = boxWidth;
     this.spaceWidth = spaceWidth;
     this.boxHeight = boxHeight;
-    this.spaceHeight = spaceHeight;;
-    var height = this.genAmount() * (boxHeight + 2 * spaceHeight);
-    this.canvasHeight = height;
-    var width = this.maxGen() * (boxWidth + 2 * spaceWidth);
+    this.spaceHeight = spaceHeight;
+    var width = maxX + boxWidth + 2 * spaceWidth;
     this.canvasWidth = width;
-  }
-  
-  //get the starting X value for boxes of a specified generation
-  getStartPositionX(gen: number){
-    var countGen = this.people.filter(item => item.Generation == gen).length;
-    var startBoxX = (this.canvasWidth/2) - (this.boxWidth/2);
-    
-    for (var i = 1; i < countGen; i++) {
-      startBoxX-= (this.spaceWidth/2) + (this.boxWidth)/2 ;
-    }
-    return startBoxX;
-  }
-
-  //get the starting Y value for boxes of a specified generation
-  getStartPositionY(){
-    var amountGen = this.genAmount();
-    var startBoxY = (this.canvasHeight/2) - (this.boxHeight/2);
-    
-    for (var i = 1; i < amountGen; i++) {
-      startBoxY-= (this.spaceHeight/2) + (this.boxHeight)/2 ;
-    }
-    return startBoxY;
+    var height = maxY + boxHeight + 2 * spaceHeight;
+    this.canvasHeight = height;
   }
 
   init() {
@@ -183,34 +156,17 @@ export class CanvasComponent implements OnInit {
     this.offsetX = this.canvas.nativeElement.getBoundingClientRect().left;
     this.offsetY = this.canvas.nativeElement.getBoundingClientRect().top;
     this.boxes = [];
-    var j = 0;
-    var k = 0;
-    var gen = this.people[0].Generation;
-    var startBoxX = this.getStartPositionX(gen);
-    var startBoxY = this.getStartPositionY();
-
-    for (var i =0; i < this.people.length; i++) {
+    //Position the boxes on the canvas
+    for (var i=0; i < this.people.length; i++) {
+      var posX = this.people[i].PositionX;
+      var posY = this.people[i].PositionY;
       var val = this.people[i].PersonId;
-      if (this.people[i].Generation == gen){
-        this.boxes.push({
-        x: startBoxX + k, y: startBoxY + j, w: this.boxWidth, h: this.boxHeight, personId: val
-        });
-        k+= this.boxWidth + this.spaceWidth;
-      }
-      else {
-        gen = this.people[i].Generation;
-        startBoxX = this.getStartPositionX(gen);
-        k = 0;
-        this.boxes.push({
-          x: startBoxX + k , y: startBoxY + this.boxHeight + this.spaceHeight + j, 
-          w: this.boxWidth, h: this.boxHeight, personId: val
-          });
-          k+= this.boxWidth + this.spaceWidth;
-          j+= this.boxHeight + this.spaceHeight;
-      }
-      
-    }
 
+      this.boxes.push({
+        x: posX, y: posY, w: this.boxWidth, h: this.boxHeight, personId: val
+      });
+    }
+    
     this.connectorsRel = [];
     
     for (var i =0; i < this.relationships.length; i++) {
@@ -323,6 +279,8 @@ export class CanvasComponent implements OnInit {
         return true;
       }
     }
+    //added dragTarget = null to only update MouseUp when from dragTarget
+    this.dragTarget = null;
     return false;
   }
 
@@ -357,6 +315,10 @@ export class CanvasComponent implements OnInit {
   }
 
   handleMouseUp(e) {
+    //update position change in DB
+    if(this.dragTarget != null){
+      this.updatePos(this.dragTarget.personId, this.dragTarget.x, this.dragTarget.y);
+    }
     this.dragTarget = null;
     this.isDown = false;
   }
@@ -382,4 +344,26 @@ export class CanvasComponent implements OnInit {
     this.draw();
   }
 
+  //update elements position in DB on MouseUp
+  updatePos(id : number, posX : number, posY : number){
+    var personToUpdate = this.people.find(x => x.PersonId == id);
+    var PersonId = personToUpdate.PersonId;
+    var FirstName = personToUpdate.FirstName;
+    var LastName = personToUpdate.LastName;
+    var Gender = personToUpdate.Gender;
+    var BirthDate = personToUpdate.BirthDate;
+    var DeathDate = personToUpdate.DeathDate;
+    var TreeId = personToUpdate.TreeId;
+    var Generation = personToUpdate.Generation;
+    var PositionX = posX;
+    var PositionY = posY;
+    this.personService.updatePosition(id, { PersonId, FirstName, LastName, Gender,
+      BirthDate, DeathDate, TreeId, Generation, PositionX, PositionY } as Person )
+      .subscribe(data => {
+        //reload the canvas if user wants more space
+        if (PositionX > this.maxX || PositionY >this.maxY){
+          this.reload();
+        } 
+      });
+  }
 }

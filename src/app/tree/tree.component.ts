@@ -116,11 +116,14 @@ export class TreeComponent implements OnInit {
     this.addStartVal = !this.addStartVal;
   }
 
-  addPerson2(FirstName : string, LastName: string, Gender: string,
+  addFirstPerson(FirstName : string, LastName: string, Gender: string,
     BirthDate: Date, Generation: number, DeathDate?: Date){
     let TreeId = this.treeId;
+    let PositionX = 20;
+    let PositionY = 20;
     this.personService.addPerson({ FirstName, LastName, Gender,
-                                    BirthDate, DeathDate, TreeId, Generation } as Person)
+                                    BirthDate, DeathDate, TreeId, Generation,
+                                    PositionX, PositionY } as Person)
       .subscribe(personId =>{
         this.isEmpty = false;
         this.reloadChild();
@@ -131,8 +134,21 @@ export class TreeComponent implements OnInit {
   addPerson(FirstName : string, LastName: string, Gender: string,
             BirthDate: Date, Generation: number, DeathDate?: Date){
     let TreeId = this.treeId;
+    if (this.selectedRel.rel == "Parent"){
+      var PositionX= this.selectedPerson.PositionX; 
+      var PositionY= this.selectedPerson.PositionY - 75; 
+    }
+    else if (this.selectedRel.rel == "Child"){
+      var PositionX= this.selectedPerson.PositionX; 
+      var PositionY= this.selectedPerson.PositionY + 75; 
+    }
+    else {
+      var PositionX= this.selectedPerson.PositionX + 150; 
+      var PositionY= this.selectedPerson.PositionY; 
+    }
     this.personService.addPerson({ FirstName, LastName, Gender,
-                                  BirthDate, DeathDate, TreeId, Generation } as Person)
+                                  BirthDate, DeathDate, TreeId, Generation,
+                                  PositionX, PositionY } as Person)
       .subscribe(personId =>{
         this.newPersonId = personId;
         if (this.selectedRel.rel == "Parent"){

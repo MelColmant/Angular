@@ -7,4 +7,6 @@ export interface Person {
     DeathDate: Date;
     TreeId: number;
     Generation: number;
+    PositionX: number;
+    PositionY: number;
 }
