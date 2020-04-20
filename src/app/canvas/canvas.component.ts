@@ -36,6 +36,11 @@ export class CanvasComponent implements OnInit {
   boxes: Array<any>;
   connectorsRel: Array<any>;
   connectorsPC: Array<any>;
+  connectorsRel2: Array<any>;
+  connectorsPC2: Array<any>;
+  cloneConnectorsPC2: Array<any>;
+  familyArray: Array<any>;
+  pcArray: Array<any>;
   startX : number;
   startY : number;
   mouseX : number;
@@ -54,6 +59,8 @@ export class CanvasComponent implements OnInit {
   spaceHeight: number;
   maxX: number;
   maxY: number;
+  couldResizeX: boolean;
+  couldResizeY: boolean;
 
   constructor(
     private personService: PersonService,
@@ -66,6 +73,8 @@ export class CanvasComponent implements OnInit {
     //setting up initial width and height
     this.canvasWidth=1;
     this.canvasHeight=1;
+    this.couldResizeX = false;
+    this.couldResizeY = false;
     //listening to parent events to reload canvas when needed
     this.eventsSubscription = this.events.subscribe(() => this.reload());
     this.isLoaded = true;
@@ -166,7 +175,7 @@ export class CanvasComponent implements OnInit {
         x: posX, y: posY, w: this.boxWidth, h: this.boxHeight, personId: val
       });
     }
-    
+
     this.connectorsRel = [];
     
     for (var i =0; i < this.relationships.length; i++) {
@@ -189,7 +198,317 @@ export class CanvasComponent implements OnInit {
       });
     }
 
-    this.draw();
+    //working on my tests
+    this.connectorsRel2 = [];
+    
+    for (var i =0; i < this.relationships.length; i++) {
+      var val1 = this.relationships[i].Person1Id;
+      var val2 = this.relationships[i].Person2Id;
+      var relType = this.relationships[i].RelationshipTypeCode;
+      this.connectorsRel2.push({
+        person1Id : val1, person2Id : val2, relType : relType
+      });
+    }
+
+    this.connectorsPC2 = [];
+    
+    for (var i =0; i < this.parentchilds.length; i++) {
+      var val1 = this.parentchilds[i].Person1Id;
+      var val2 = this.parentchilds[i].Person2Id;
+      var isAdopted = this.parentchilds[i].IsAdopted;
+      this.connectorsPC2.push({
+        person1Id : val1, person2Id : val2, isAdopted : isAdopted
+      });
+    }
+    
+    //this.draw();
+    this.newDraw();
+  }
+
+  //check if array has duplicates or not
+  hasDuplicate(array){
+    return (new Set(array)).size != array.length;
+  }
+  //find duplicates in an array
+  findDuplicates(array){
+    const object = {};
+    const result = [];
+    array.forEach(item => {
+      if(!object[item])
+        object[item] = 0;
+      object[item] += 1;
+    })
+    for (const prop in object) {
+      if(object[prop] >= 2){
+        result.push(prop);
+      }
+    }
+    return result;
+  }
+
+  newDraw() {
+
+    // clear the canvas
+    this.ctx.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
+
+    for (var i =0; i < this.boxes.length; i++) {
+      var box = this.boxes[i];
+      if (this.people[i].Gender == "m")
+      {
+        this.ctx.fillStyle = "LightBlue";
+      }
+      else this.ctx.fillStyle = "LightPink";
+      this.ctx.fillRect(box.x, box.y, box.w, box.h);
+      this.ctx.fillStyle = "Black";
+      this.ctx.font = "13px Roboto";
+      this.ctx.fillText(this.people[i].FirstName + " " + this.people[i].LastName, 
+      box.x + 5, box.y + (this.boxHeight/2));
+    }
+
+    this.familyArray = [];
+    this.cloneConnectorsPC2 = [...this.connectorsPC2];
+    //loop on relationships & parentchild to find relationships with children
+    for (var i = 0; i < this.connectorsRel2.length; i++) {
+      for (var j = 0; j < this.cloneConnectorsPC2.length; j++) {
+        if (this.connectorsRel2[i].person1Id == this.cloneConnectorsPC2[j].person1Id){
+          //push kids from P1 of Rel in array
+          this.familyArray.push(this.cloneConnectorsPC2[j].person2Id);
+        }
+        if (this.connectorsRel2[i].person2Id == this.cloneConnectorsPC2[j].person1Id){
+          //push kids from P2 of Rel in array
+          this.familyArray.push(this.cloneConnectorsPC2[j].person2Id);
+        }
+      }
+      //TEST OK
+      //for (var z = 0; z < this.familyArray.length; z++){
+      //  console.log("we were there: " + i);
+      //  console.log(this.familyArray[z]);
+      //}
+      //END TEST
+      //ended the loop on PC rels
+      if (this.familyArray.length == 0){
+        //draw simple relation for that rel (this.connectorsRel2[i])
+        this.drawSimple(this.connectorsRel2[i].person1Id, this.connectorsRel2[i].person1Id);
+      }
+      else if (!this.hasDuplicate(this.familyArray)){
+        //there are kids but not common kids
+        //draw simple relation for that rel (this.connectorsRel2[i])
+        this.drawSimple(this.connectorsRel2[i].person1Id, this.connectorsRel2[i].person1Id);
+        //THEN reinitialize the array
+        this.familyArray = [];
+      }
+      else if (this.hasDuplicate(this.familyArray)){
+        //remove kids that are NOT duplicated (they are NOT from that relationship) & should stay in PC
+        //remove 1 of the 2 of duplicated kids (to clean for drawing) 
+        this.familyArray = this.findDuplicates(this.familyArray);
+        //TEST OK
+        //console.log("we were there!" + i);
+        //for (var z = 0; z < this.familyArray.length; z++){
+        //    console.log(this.familyArray[z]);
+        //  }
+        //END OF TEST
+        //& remove all from PC
+        
+        // THE ISSUE IS IN THE SPLICE THEN!
+        var tempArray = [];
+        for (var k = 0; k < this.familyArray.length; k++){
+          for (var l = 0; l < this.cloneConnectorsPC2.length; l++){
+            if(this.cloneConnectorsPC2[l].person2Id == this.familyArray[k]){
+            //  this.connectorsPC2.splice(l, 1);
+            tempArray.push(this.cloneConnectorsPC2[l]);
+            }
+
+          }   
+        }
+        this.cloneConnectorsPC2 = this.cloneConnectorsPC2.filter(x => !tempArray.includes(x));
+        
+      
+        //draw 2 parents rel for that rel with kids (this.connectorsRel2[i]) & this.familArray
+        this.draw2Parents(this.connectorsRel2[i].person1Id, this.connectorsRel2[i].person2Id,
+                          this.familyArray);
+        //THEN reinitialize the array
+        this.familyArray = [];
+        
+      }
+    }  
+
+  this.pcArray = [];
+  //now connectorsPC2 only contains 1 parent/childs rel, which are sorted by parent id!
+  for (var i = 0; i < this.cloneConnectorsPC2.length; i++) {
+    console.log(this.cloneConnectorsPC2[i]);
+    if (i+1 == this.cloneConnectorsPC2.length) {
+      this.pcArray.push(this.cloneConnectorsPC2[i].person2Id);
+      // draw from this.pcArray as children and the father/mother
+      this.draw1Parent(this.cloneConnectorsPC2[i].person1Id, this.pcArray);
+      //THEN empty
+      this.pcArray = [];
+    }
+    if (i+1 != this.cloneConnectorsPC2.length &&
+        this.cloneConnectorsPC2[i].person1Id != this.cloneConnectorsPC2[i+1].person1Id){
+      this.pcArray.push(this.cloneConnectorsPC2[i].person2Id);
+      //draw from this.pcArray as children and the father/mother
+      this.draw1Parent(this.cloneConnectorsPC2[i].person1Id, this.pcArray);
+      //THEN empty
+      this.pcArray = [];
+    }
+    else if (i+1 != this.cloneConnectorsPC2.length &&
+      this.cloneConnectorsPC2[i].person1Id == this.cloneConnectorsPC2[i+1].person1Id){
+      this.pcArray.push(this.cloneConnectorsPC2[i].person2Id);
+    }
+  
+  }
+}
+
+  drawSimple(id1, id2) {
+    var box1 = this.boxes.find(x => x.personId == id1);
+    var box2 = this.boxes.find(x => x.personId == id2);
+    this.ctx.globalCompositeOperation = "destination-over";
+    this.ctx.beginPath();
+    this.ctx.moveTo(box1.x + box1.w / 2, box1.y + box1.h / 2);
+    this.ctx.lineTo(box2.x + box2.w / 2, box2.y + box2.h / 2);
+    this.ctx.strokeStyle = "Green";
+    this.ctx.stroke();
+    //getting back to drawing on top of the rest
+    this.ctx.globalCompositeOperation = "source-over";
+  }
+
+  draw1Parent(idP, arrayC) {
+    var box1 = this.boxes.find(x => x.personId == idP);
+    //set up the parent box array
+    var boxesP = [];
+    boxesP.push(box1);
+    //set up the children box array
+    var boxesC = [];
+    for (var i=0; i < arrayC.length; i++){
+      var box = this.boxes.find(x => x.personId == arrayC[i]);
+      boxesC.push(box);
+    }
+    // no relative position of the inflection point in X!
+
+    //relative position of the inflection point in Y > need to loop!
+    var relInflectionPointY = (Math.abs((boxesC[0].y + ((boxesC[0].h)/2)) - 
+                              (boxesP[0].y + ((boxesP[0].h)/2))))/2;
+    var pMinBox = boxesP[0];
+    var cMinBox = boxesC[0];
+    for (var i = 0; i < boxesC.length; i++) {
+      var childBox = boxesC[i];
+      var tempMin = (Math.abs((childBox.y + ((childBox.h)/2)) - 
+                      (pMinBox.y + ((pMinBox.h)/2))))/2;
+      if (tempMin < relInflectionPointY) {
+          relInflectionPointY = tempMin;
+          cMinBox = childBox;
+      }
+    }
+
+    var absMinX = boxesP[0].x + (boxesP[0].w)/2;
+    var absMinY = Math.min((cMinBox.y + ((cMinBox.h)/2)), (pMinBox.y + ((pMinBox.h)/2)));
+    // get the absolute inflection points
+    var absInflectionPointX = absMinX;
+    var absInflectionPointY = absMinY + relInflectionPointY;
+
+    var box = boxesP[0];
+    this.ctx.globalCompositeOperation = "destination-over";
+    this.ctx.beginPath();
+    this.ctx.moveTo(box.x + box.w / 2, box.y + box.h / 2);
+    this.ctx.lineTo(box.x + box.w / 2, absInflectionPointY);
+    this.ctx.strokeStyle = "Green";
+    this.ctx.stroke();
+    this.ctx.beginPath();
+    this.ctx.moveTo(box.x + box.w / 2, absInflectionPointY);
+    this.ctx.lineTo(absInflectionPointX, absInflectionPointY);
+    this.ctx.stroke();
+    //getting back to drawing on top of the rest
+    this.ctx.globalCompositeOperation = "source-over";
+
+    for (var i = 0; i < boxesC.length; i++){
+      var box = boxesC[i];
+      this.ctx.globalCompositeOperation = "destination-over";
+      this.ctx.beginPath();
+      this.ctx.moveTo(box.x + box.w / 2, box.y + box.h / 2);
+      this.ctx.lineTo(box.x + box.w / 2, absInflectionPointY);
+      this.ctx.strokeStyle = "Green";
+      this.ctx.stroke();
+      this.ctx.beginPath();
+      this.ctx.moveTo(box.x + box.w / 2, absInflectionPointY);
+      this.ctx.lineTo(absInflectionPointX, absInflectionPointY);
+      this.ctx.stroke();
+      //getting back to drawing on top of the rest
+      this.ctx.globalCompositeOperation = "source-over";
+    }
+  }
+
+  draw2Parents(idP1, idP2, arrayC) {
+    var box1 = this.boxes.find(x => x.personId == idP1);
+    var box2 = this.boxes.find(x => x.personId == idP2);
+    //set up the parents box array
+    var boxesP = [];
+    boxesP.push(box1, box2);
+    //set up the children box array
+    var boxesC = [];
+    for (var i=0; i < arrayC.length; i++){
+      var box = this.boxes.find(x => x.personId == arrayC[i]);
+      boxesC.push(box);
+    }
+    //relative position of the inflection point in X
+    var relInflectionPointX = (Math.abs((boxesP[1].x + ((boxesP[1].w)/2)) - 
+                              (boxesP[0].x + ((boxesP[0].w)/2))))/2;
+    //relative position of the inflection point in Y > need to loop!
+    var relInflectionPointY = (Math.abs((boxesC[0].y + ((boxesC[0].h)/2)) - 
+                              (boxesP[0].y + ((boxesP[0].h)/2))))/2;
+    var pMinBox = boxesP[0];
+    var cMinBox = boxesC[0];
+    for (var i = 0; i < boxesC.length; i++) {
+      var childBox = boxesC[i];
+      for (var j = 0; j < boxesP.length; j++) {
+        var parentBox = boxesP[j];
+        var tempMin = (Math.abs((childBox.y + ((childBox.h)/2)) - 
+                      (parentBox.y + ((parentBox.h)/2))))/2;
+        if (tempMin < relInflectionPointY) {
+          relInflectionPointY = tempMin;
+          pMinBox = parentBox;
+          cMinBox = childBox;
+        }
+      }
+    }
+
+    var absMinX = Math.min((boxesP[0].x + ((boxesP[0].w)/2)), (boxesP[1].x + ((boxesP[1].w)/2)));
+    var absMinY = Math.min((cMinBox.y + ((cMinBox.h)/2)), (pMinBox.y + ((pMinBox.h)/2)));
+    // get the absolute inflection points
+    var absInflectionPointX = absMinX + relInflectionPointX;
+    var absInflectionPointY = absMinY + relInflectionPointY;
+
+    for (var i = 0; i < boxesP.length; i++){
+      var box = boxesP[i];
+      this.ctx.globalCompositeOperation = "destination-over";
+      this.ctx.beginPath();
+      this.ctx.moveTo(box.x + box.w / 2, box.y + box.h / 2);
+      this.ctx.lineTo(box.x + box.w / 2, absInflectionPointY);
+      this.ctx.strokeStyle = "Black";
+      this.ctx.stroke();
+      this.ctx.beginPath();
+      this.ctx.moveTo(box.x + box.w / 2, absInflectionPointY);
+      this.ctx.lineTo(absInflectionPointX, absInflectionPointY);
+      this.ctx.stroke();
+      //getting back to drawing on top of the rest
+      this.ctx.globalCompositeOperation = "source-over";
+    }
+
+    for (var i = 0; i < boxesC.length; i++){
+      var box = boxesC[i];
+      this.ctx.globalCompositeOperation = "destination-over";
+      this.ctx.beginPath();
+      this.ctx.moveTo(box.x + box.w / 2, box.y + box.h / 2);
+      this.ctx.lineTo(box.x + box.w / 2, absInflectionPointY);
+      this.ctx.strokeStyle = "Black";
+      this.ctx.stroke();
+      this.ctx.beginPath();
+      this.ctx.moveTo(box.x + box.w / 2, absInflectionPointY);
+      this.ctx.lineTo(absInflectionPointX, absInflectionPointY);
+      this.ctx.stroke();
+      //getting back to drawing on top of the rest
+      this.ctx.globalCompositeOperation = "source-over";
+    }
+
   }
 
   draw() {
@@ -207,7 +526,7 @@ export class CanvasComponent implements OnInit {
       this.ctx.fillStyle = "Black";
       this.ctx.font = "13px Roboto";
       this.ctx.fillText(this.people[i].FirstName + " " + this.people[i].LastName, 
-      box.x + 5, box.y + 18);
+      box.x + 5, box.y + (this.boxHeight/2));
     }
     
     for (var i = 0; i < this.connectorsRel.length; i++) {
@@ -312,6 +631,14 @@ export class CanvasComponent implements OnInit {
     this.startX = +e.clientX - this.offsetX;
     this.startY = +e.clientY - this.offsetY;
     this.isDown = this.hit(this.startX, this.startY);
+    // update the boolean if the dragTarget has MaxX
+    if (this.dragTarget != null && this.dragTarget.x == this.maxX) {
+      this.couldResizeX = true;
+    }
+    // update the boolean if the dragTarget has MaxY
+    if (this.dragTarget != null && this.dragTarget.y == this.maxY) {
+      this.couldResizeY = true;
+    }
   }
 
   handleMouseUp(e) {
@@ -341,7 +668,8 @@ export class CanvasComponent implements OnInit {
     this.startY = this.mouseY;
     this.dragTarget.x += dx;
     this.dragTarget.y += dy;
-    this.draw();
+    //this.draw();
+    this.newDraw();
   }
 
   //update elements position in DB on MouseUp
@@ -361,9 +689,17 @@ export class CanvasComponent implements OnInit {
       BirthDate, DeathDate, TreeId, Generation, PositionX, PositionY } as Person )
       .subscribe(data => {
         //reload the canvas if user wants more space
-        if (PositionX > this.maxX || PositionY >this.maxY){
+        if (PositionX > this.maxX || PositionY > this.maxY){
           this.reload();
-        } 
+        }
+        //reload the canvas if user needs less space in X
+        if (((PositionX + this.boxWidth) < this.maxX) && this.couldResizeX){ 
+          this.reload();
+        }
+        //reload the canvas if user needs less space in Y
+        if (((PositionY + (1.5*this.boxHeight)) < this.maxY) && this.couldResizeY){ 
+          this.reload();
+        }
       });
   }
 }
