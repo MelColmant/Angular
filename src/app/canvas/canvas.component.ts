@@ -39,6 +39,9 @@ export class CanvasComponent implements OnInit {
   cloneConnectorsPC: Array<any>;
   familyArray: Array<any>;
   pcArray: Array<any>;
+  drawSimpleArray: Array<any>;
+  draw1parentArray: Array<any>;
+  draw2parentsArray: Array<any>;
   startX : number;
   startY : number;
   mouseX : number;
@@ -69,8 +72,8 @@ export class CanvasComponent implements OnInit {
 
   ngOnInit() : void {
     //setting up initial width and height
-    this.canvasWidth=1;
-    this.canvasHeight=1;
+    this.canvasWidth=0;
+    this.canvasHeight=0;
     this.couldResizeX = false;
     this.couldResizeY = false;
     //listening to parent events to reload canvas when needed
@@ -194,7 +197,87 @@ export class CanvasComponent implements OnInit {
         person1Id : val1, person2Id : val2, isAdopted : isAdopted
       });
     }
+
+    //Initialize temporary arrays
+    this.familyArray = [];
+    this.cloneConnectorsPC = [...this.connectorsPC];
+    this.pcArray = [];
+    this.drawSimpleArray = [];
+    this.draw1parentArray = [];
+    this.draw2parentsArray = [];
+    //Loop on relationships array & parentchild array to find relationships with children
+    for (var i = 0; i < this.connectorsRel.length; i++) {
+      for (var j = 0; j < this.cloneConnectorsPC.length; j++) {
+        if (this.connectorsRel[i].person1Id == this.cloneConnectorsPC[j].person1Id){
+          //Push children from person1 of the relationship in familyArray
+          this.familyArray.push(this.cloneConnectorsPC[j].person2Id);
+        }
+        if (this.connectorsRel[i].person2Id == this.cloneConnectorsPC[j].person1Id){
+          //Push children from person2 of the relationship in familyArray
+          this.familyArray.push(this.cloneConnectorsPC[j].person2Id);
+        }
+      }
+      //Act on the familyArray
+      if (this.familyArray.length == 0){
+        //This relationship has no children => draw a simple relationship
+        this.drawSimpleArray.push({1: this.connectorsRel[i].person1Id,
+                                    2: this.connectorsRel[i].person2Id})
+      }
+      else if (!this.hasDuplicate(this.familyArray)){
+        //There aren't any common children in that relationship => draw a simple relationship
+        this.drawSimpleArray.push({1: this.connectorsRel[i].person1Id,
+                                    2: this.connectorsRel[i].person2Id})
+        //Then reinitialize familyArray
+        this.familyArray = [];
+      }
+      else if (this.hasDuplicate(this.familyArray)){
+        //There are common children in that relationship =>
+        //Just keep one of each duplicated children (they are the common children in that relationship)
+        this.familyArray = this.findDuplicates(this.familyArray);
+        //Remove these children from cloneConnectorsPC since both parents have been found =>
+        var tempArray = [];
+        for (var k = 0; k < this.familyArray.length; k++){
+          for (var l = 0; l < this.cloneConnectorsPC.length; l++){
+            if(this.cloneConnectorsPC[l].person2Id == this.familyArray[k]){
+            //Push all common children in tempArray
+            tempArray.push(this.cloneConnectorsPC[l]);
+            }
+          }   
+        }
+        //Filter cloneConnectorsPC from common children
+        this.cloneConnectorsPC = this.cloneConnectorsPC.filter(x => !tempArray.includes(x));
+        this.draw2parentsArray.push({1: this.connectorsRel[i].person1Id, 
+                                      2: this.connectorsRel[i].person2Id,
+                                      3: this.familyArray});
+        //Reinitialize familyArray for the next relationship in the loop
+        this.familyArray = []; 
+      }
+    }  
     
+    //cloneConnectorsPC now only contains 1 parent/childs relationships, 
+    //which are sorted by ParentId, as per API request 
+    for (var i = 0; i < this.cloneConnectorsPC.length; i++) {
+      if (i+1 == this.cloneConnectorsPC.length) {
+        //Got to the end of the array => push last element before drawing that relationship 
+        this.pcArray.push(this.cloneConnectorsPC[i].person2Id);
+        this.draw1parentArray.push({1: this.cloneConnectorsPC[i].person1Id, 2: this.pcArray})
+        //Then empty pcArray
+        this.pcArray = [];
+      }
+      if (i+1 != this.cloneConnectorsPC.length &&
+        this.cloneConnectorsPC[i].person1Id != this.cloneConnectorsPC[i+1].person1Id){
+        //Next element hasn't the same parent as this element => push and draw
+        this.pcArray.push(this.cloneConnectorsPC[i].person2Id);
+        this.draw1parentArray.push({1: this.cloneConnectorsPC[i].person1Id, 2: this.pcArray})
+        //Then empty pcArray
+        this.pcArray = [];
+      }
+      else if (i+1 != this.cloneConnectorsPC.length &&
+        this.cloneConnectorsPC[i].person1Id == this.cloneConnectorsPC[i+1].person1Id){
+        //Next element has the same parent as  this element => push
+        this.pcArray.push(this.cloneConnectorsPC[i].person2Id);
+      }
+    }
     //Draw on canvas
     this.draw();
   }
@@ -238,80 +321,16 @@ export class CanvasComponent implements OnInit {
       this.ctx.fillText(this.people[i].FirstName + " " + this.people[i].LastName, 
       box.x + 5, box.y + (0.55*this.boxHeight));
     }
-    //Initialize temporary arrays
-    this.familyArray = [];
-    this.cloneConnectorsPC = [...this.connectorsPC];
-    //Loop on relationships array & parentchild array to find relationships with children
-    for (var i = 0; i < this.connectorsRel.length; i++) {
-      for (var j = 0; j < this.cloneConnectorsPC.length; j++) {
-        if (this.connectorsRel[i].person1Id == this.cloneConnectorsPC[j].person1Id){
-          //Push children from person1 of the relationship in familyArray
-          this.familyArray.push(this.cloneConnectorsPC[j].person2Id);
-        }
-        if (this.connectorsRel[i].person2Id == this.cloneConnectorsPC[j].person1Id){
-          //Push children from person2 of the relationship in familyArray
-          this.familyArray.push(this.cloneConnectorsPC[j].person2Id);
-        }
-      }
-      //Act on the familyArray
-      if (this.familyArray.length == 0){
-        //This relationship has no children => draw a simple relationship
-        this.drawSimple(this.connectorsRel[i].person1Id, this.connectorsRel[i].person2Id);
-      }
-      else if (!this.hasDuplicate(this.familyArray)){
-        //There aren't any common children in that relationship => draw a simple relationship
-        this.drawSimple(this.connectorsRel[i].person1Id, this.connectorsRel[i].person2Id);
-        //Then reinitialize familyArray
-        this.familyArray = [];
-      }
-      else if (this.hasDuplicate(this.familyArray)){
-        //There are common children in that relationship =>
-        //Just keep one of each duplicated children (they are the common children in that relationship)
-        this.familyArray = this.findDuplicates(this.familyArray);
-        //Remove these children from cloneConnectorsPC since both parents have been found =>
-        var tempArray = [];
-        for (var k = 0; k < this.familyArray.length; k++){
-          for (var l = 0; l < this.cloneConnectorsPC.length; l++){
-            if(this.cloneConnectorsPC[l].person2Id == this.familyArray[k]){
-            //Push all common children in tempArray
-            tempArray.push(this.cloneConnectorsPC[l]);
-            }
-          }   
-        }
-        //Filter cloneConnectorsPC from common children
-        this.cloneConnectorsPC = this.cloneConnectorsPC.filter(x => !tempArray.includes(x));
-        //Draw the 2 parents relationship
-        this.draw2Parents(this.connectorsRel[i].person1Id, this.connectorsRel[i].person2Id,
-                          this.familyArray);
-        //Reinitialize familyArray for the next relationship in the loop
-        this.familyArray = []; 
-      }
-    }  
-    //Initialize temporary array
-    this.pcArray = [];
-    //cloneConnectorsPC now only contains 1 parent/childs relationships, 
-    //which are sorted by ParentId, as per API request 
-    for (var i = 0; i < this.cloneConnectorsPC.length; i++) {
-      if (i+1 == this.cloneConnectorsPC.length) {
-        //Got to the end of the array => push last element before drawing that relationship 
-        this.pcArray.push(this.cloneConnectorsPC[i].person2Id);
-        this.draw1Parent(this.cloneConnectorsPC[i].person1Id, this.pcArray);
-        //Then empty pcArray
-        this.pcArray = [];
-      }
-      if (i+1 != this.cloneConnectorsPC.length &&
-        this.cloneConnectorsPC[i].person1Id != this.cloneConnectorsPC[i+1].person1Id){
-        //Next element hasn't the same parent as this element => push and draw
-        this.pcArray.push(this.cloneConnectorsPC[i].person2Id);
-        this.draw1Parent(this.cloneConnectorsPC[i].person1Id, this.pcArray);
-        //Then empty pcArray
-        this.pcArray = [];
-      }
-      else if (i+1 != this.cloneConnectorsPC.length &&
-        this.cloneConnectorsPC[i].person1Id == this.cloneConnectorsPC[i+1].person1Id){
-        //Next element has the same parent as  this element => push
-        this.pcArray.push(this.cloneConnectorsPC[i].person2Id);
-      }
+    //Draw the relationships
+    for (var j = 0; j < this.draw2parentsArray.length; j++){
+      this.draw2Parents(this.draw2parentsArray[j][1], this.draw2parentsArray[j][2],
+                        this.draw2parentsArray[j][3] )
+    }
+    for (var k = 0; k < this.draw1parentArray.length; k++){
+      this.draw1Parent(this.draw1parentArray[k][1], this.draw1parentArray[k][2])
+    }
+    for (var l = 0; l < this.drawSimpleArray.length; l++){
+      this.drawSimple(this.drawSimpleArray[l][1], this.drawSimpleArray[l][2])
     }
   }
   //Draw a simple relationship between 2 people
