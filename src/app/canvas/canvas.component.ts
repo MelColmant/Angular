@@ -21,10 +21,10 @@ import { Subscription, Observable } from 'rxjs';
 })
 export class CanvasComponent implements OnInit {
 
-  private eventsSubscription: Subscription;
-  @Input() events: Observable<void>;
-
-
+  private reloadSubscription: Subscription;
+  @Input() reloadCanvas: Observable<void>;
+  private yTranslationSubscription: Subscription;
+  @Input() yTranslation: Observable<void>;
   @Input() tree: Tree;
   @ViewChild('canvas', { static: true})
   canvas: ElementRef<HTMLCanvasElement>;
@@ -62,6 +62,9 @@ export class CanvasComponent implements OnInit {
   maxY: number;
   couldResizeX: boolean;
   couldResizeY: boolean;
+  //Default value of a boolean is false
+  //Use canSkip to skip methods when not needed
+  canSkip: boolean;
 
   constructor(
     private personService: PersonService,
@@ -71,13 +74,14 @@ export class CanvasComponent implements OnInit {
   ) { }
 
   ngOnInit() : void {
-    //setting up initial width and height
+    //Setting up initial width and height
     this.canvasWidth=0;
     this.canvasHeight=0;
     this.couldResizeX = false;
     this.couldResizeY = false;
-    //listening to parent events to reload canvas when needed
-    this.eventsSubscription = this.events.subscribe(() => this.reload());
+    //Listening to parent events to reload canvas when needed
+    this.reloadSubscription = this.reloadCanvas.subscribe(() => this.reload());
+    this.yTranslationSubscription = this.yTranslation.subscribe(() => this.yTranslate());
     this.isLoaded = true;
     this.ctx = this.canvas.nativeElement.getContext('2d');
     this.getAllFromTree();
@@ -87,8 +91,13 @@ export class CanvasComponent implements OnInit {
     this.ngOnInit();
   }
 
+  yTranslate(){
+    console.log("it works");
+  }
+
   ngOnDestroy() {
-    this.eventsSubscription.unsubscribe();
+    this.reloadSubscription.unsubscribe();
+    this.yTranslationSubscription.unsubscribe();
   }
   //Get all people from this tree
   getAllFromTree(){
@@ -104,6 +113,11 @@ export class CanvasComponent implements OnInit {
         //Set up canvas size based on maxX, box height and space height (canvas height)
         //as well as maxY, box width and space width (canvas width)
         this.setCanvas(110, 20, 55, 20, this.getMaxX(), this.getMaxY());
+        //Skip other methods if the goal is just to resize then draw
+        if (this.canSkip){
+          this.canSkip = false;
+          this.draw();
+        }
         this.getAllRelFromTree(TreeId);
       });
   }
@@ -113,7 +127,7 @@ export class CanvasComponent implements OnInit {
     this.relationshipService.getAllByTree(id)
       .subscribe(relationships => {
         this.relationships = relationships;
-        this.getAllPCFromTree(TreeId)
+        this.getAllPCFromTree(TreeId);
       });
   }
   //Get all parent-children relationships from this tree
@@ -124,7 +138,7 @@ export class CanvasComponent implements OnInit {
         this.init();
       });
   }
-  
+
   //Get the maximum box position in X
   getMaxX() {
     this.maxX = 0;
@@ -306,7 +320,8 @@ export class CanvasComponent implements OnInit {
 
   draw() {
     //Clear the canvas
-    this.ctx.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
+    //this.ctx.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
+    this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
     //Draw the boxes
     for (var i =0; i < this.boxes.length; i++) {
       var box = this.boxes[i];
@@ -578,15 +593,20 @@ export class CanvasComponent implements OnInit {
       .subscribe(data => {
         //Reload canvas if user wants more space
         if (PositionX > this.maxX || PositionY > this.maxY){
-          //ideally should just use draw with new Canvas!!!
+          //Skip over unneeded calls/methods 
+          this.canSkip = true;
           this.reload();
         }
         //Reload the canvas if user needs less space in X
         else if (((PositionX + this.boxWidth) < this.maxX) && this.couldResizeX){ 
+          //Skip over unneeded calls/methods 
+          this.canSkip = true;
           this.reload();
         }
         //Reload the canvas if user needs less space in Y
         else if (((PositionY + (1.5*this.boxHeight)) < this.maxY) && this.couldResizeY){ 
+          //Skip over unneeded calls/methods 
+          this.canSkip = true;
           this.reload();
         }else {
           this.couldResizeX = false;

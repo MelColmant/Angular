@@ -32,7 +32,7 @@
         <div *ngIf="isOwner && isEmpty">
             <!-- top menu if the tree is still empty -->
             <div class="dropdown">
-                <button class="dropbtn" (click)="addStart2()">Add your first person</button>
+                <button class="dropbtn" (click)="addStartFirst()">Add your first person</button>
             </div>
         </div>
         <!-- end of the top menu -->
@@ -43,11 +43,12 @@
         <!-- end of title -->
 
         <!-- canvas integration -->
-        <app-canvas [tree]="tree" [events]="eventsSubject.asObservable()"></app-canvas>
+        <app-canvas [tree]="tree" [reloadCanvas]="reloadCanvas.asObservable()"
+                    [yTranslation]="yTranslation.asObservable()"></app-canvas>
         <!-- end of canvas integration -->
 
         <!-- adding the first person of an empty tree start here -->
-        <div *ngIf="addStartVal2">
+        <div *ngIf="addStartValFirst">
             <h2>Add your first person</h2>
                <div> <label>First name:
                     <input [(ngModel)]="firstname" #firstName required/>
@@ -87,7 +88,7 @@
             <!-- "startDate.value.length != 0" checks if it has a value. 
                                 If so, call storeDates--> 
                                 <button (click)="addFirstPerson(firstName.value, lastName.value, this.radioData, 
-                                birthDate.value, 0, deathDate.value) ; addStart2()">
+                                birthDate.value, 0, deathDate.value) ; addStartFirst()">
                 Add {{ firstname }} {{ lastname }} to your tree
                 </button>  
             

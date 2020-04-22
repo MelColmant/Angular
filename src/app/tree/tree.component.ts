@@ -32,17 +32,17 @@ export class TreeComponent implements OnInit {
   parents: Person [];
   parents2: Person [];
   newPersonId: number;
-  // need to wait for the tree object to be filled before
-  // passing it through the canvas element in the html
+  //Need to wait for the tree object to be filled before
+  //passing it through the canvas element in the html
   isLoaded: boolean;
-  // is the current user owning the tree?
+  //Is the current user owning the tree?
   isOwner: boolean;
-  // is the tree empty at the moment?
+  //Is the tree empty at the moment?
   isEmpty: boolean;
-  // items needed when adding a new person via form
+  //Items needed when adding a new person via form
   addStartVal: boolean;
   relStartVal: boolean;
-  addStartVal2: boolean;
+  addStartValFirst: boolean;
   radioData: string;
   selectedPerson: Person;
   selectedPerson1: Person;
@@ -55,8 +55,10 @@ export class TreeComponent implements OnInit {
   lastname: string;
   startDate: any;
   endDate?: any;
-  // to reload the child component (canvas) on new input
-  eventsSubject: Subject<void> = new Subject<void>();
+  //Allows to reload the child component (canvas) on new input
+  reloadCanvas: Subject<void> = new Subject<void>();
+  //Performs a Y translation when adding a person on top of the tree
+  yTranslation: Subject<void> = new Subject<void>();
   
   constructor(
     private route: ActivatedRoute,
@@ -67,7 +69,7 @@ export class TreeComponent implements OnInit {
     private relationshipService: RelationshipService,
     public dialog: MatDialog,
   ) { }
-  // loading start here
+  //Loading start here
   ngOnInit(): void {
     this.isLoaded = false;
     this.route.paramMap.subscribe(params => {
@@ -75,7 +77,7 @@ export class TreeComponent implements OnInit {
     this.getTreeFromId(this.treeId);
     });
   }
-
+  //Load the tree
   getTreeFromId(treeId: number){
     this.treeService.getTree(treeId)
       .subscribe(tree => {
@@ -83,7 +85,7 @@ export class TreeComponent implements OnInit {
         this.getAllFromTree();
       });
   }
-
+  //Load people from the tree
   getAllFromTree(){
     let TreeId = this.treeId;
     this.personService.getPersonsByTree(TreeId)
@@ -95,7 +97,7 @@ export class TreeComponent implements OnInit {
         {rel: 'Sibling', gen: 0}, {rel: 'Child', gen: -1});
         this.addStartVal = false;
         this.relStartVal = false;
-        this.addStartVal2 = false;
+        this.addStartValFirst = false;
         if(this.tree.UserId == +localStorage.getItem("UserId")){
           this.isOwner = true;
         }else this.isOwner = false;
@@ -105,11 +107,11 @@ export class TreeComponent implements OnInit {
         this.isLoaded = true;
       });
   }
-  // loading finishes here
+  //Loading finishes here
 
-  // adding a person logic start here
-  addStart2(){
-    this.addStartVal2 = !this.addStartVal2;
+  //Adding a person logic start here
+  addStartFirst(){
+    this.addStartValFirst = !this.addStartValFirst;
   }
 
   addStart(){
@@ -124,26 +126,30 @@ export class TreeComponent implements OnInit {
     this.personService.addPerson({ FirstName, LastName, Gender,
                                     BirthDate, DeathDate, TreeId, Generation,
                                     PositionX, PositionY } as Person)
-      .subscribe(personId =>{
+      .subscribe(() =>{
         this.isEmpty = false;
         this.reloadChild();
       });
   }
-
 
   addPerson(FirstName : string, LastName: string, Gender: string,
             BirthDate: Date, Generation: number, DeathDate?: Date){
     let TreeId = this.treeId;
     if (this.selectedRel.rel == "Parent"){
       var PositionX= this.selectedPerson.PositionX; 
-      var PositionY= this.selectedPerson.PositionY - 75; 
+      var PositionY= this.selectedPerson.PositionY - 80;
+      //Can't go above the canvas
+      if (PositionY < 40){
+        PositionY = 40;
+        this.canvasTranslation();
+      } 
     }
     else if (this.selectedRel.rel == "Child"){
       var PositionX= this.selectedPerson.PositionX; 
-      var PositionY= this.selectedPerson.PositionY + 75; 
+      var PositionY= this.selectedPerson.PositionY + 80; 
     }
     else {
-      var PositionX= this.selectedPerson.PositionX + 150; 
+      var PositionX= this.selectedPerson.PositionX + 160; 
       var PositionY= this.selectedPerson.PositionY; 
     }
     this.personService.addPerson({ FirstName, LastName, Gender,
@@ -222,9 +228,9 @@ export class TreeComponent implements OnInit {
         }
       })
   }
-  // adding a person logic end here
+  //Adding a person logic end here
 
-  // adding a relationshiop logic start here
+  //Adding a relationshiop logic start here
   relStart(){
     this.relStartVal = !this.relStartVal;
   }
@@ -256,19 +262,19 @@ export class TreeComponent implements OnInit {
         })  
   }
 
-  storeDates(startDate, endDate){
+  storeDates(startDate: any, endDate: any){
     this.startDate = startDate;
     this.endDate = endDate;
   }
-  // adding a relationshiop logic end here
+  //Adding a relationshiop logic end here
 
-  // updating a person logic start here
+  //Updating a person logic start here
   update(person: Person){
     this.router.navigate(['/tree/'+ this.treeId + '/person/'+ person.PersonId]);
   }
-  // updating a person logic end here
+  //Updating a person logic end here
 
-  // removing a person logic start here
+  //Removing a person logic start here
   openDialog(person: Person): void {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       width: '400px',
@@ -304,9 +310,9 @@ export class TreeComponent implements OnInit {
         this.reloadChild();
       });
   }
-  // removing a person logic end here
+  //Removing a person logic end here
 
-  //reload the people array after a change
+  //Reload the people array after a change
   reloadPeople() {
     let TreeId = this.treeId;
     this.personService.getPersonsByTree(TreeId)
@@ -315,8 +321,13 @@ export class TreeComponent implements OnInit {
       });
   }
 
-  // reload the canvas after a change
+  //Reload the canvas after a change
   reloadChild() {
-    this.eventsSubject.next();
+    this.reloadCanvas.next();
+  }
+
+  //Push a Y translation on the canvas
+  canvasTranslation() {
+    this.yTranslation.next();
   }
 }

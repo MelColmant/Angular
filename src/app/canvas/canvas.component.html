@@ -2,7 +2,7 @@
     <canvas #canvas (mousedown)="handleMouseDown($event)" (mouseup)="handleMouseUp($event)" 
                     (mouseout)="handleMouseOut($event)" (mousemove)="handleMouseMove($event)"
                     (dblclick)="handleMouseClick($event)"
-                    width="{{canvasWidth}}" height="{{canvasHeight}}"></canvas>
+                    width="{{canvasWidth}}" height="{{canvasHeight}}"></canvas> 
 </div>
 
 <div *ngIf='!isLoaded'>
